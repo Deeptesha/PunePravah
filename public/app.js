@@ -1476,7 +1476,7 @@ function initFlowsMap() {
 }
 
 function updateGoogleMapsRoute() {
-  if (!directionsService || !directionsRenderer || typeof google === "undefined") return;
+  if (!advisoryMap || typeof google === "undefined") return;
 
   const originKey = document.getElementById("route-origin")?.value;
   const destKey   = document.getElementById("route-destination")?.value;
@@ -1486,24 +1486,146 @@ function updateGoogleMapsRoute() {
   const dest   = PLACE_COORDS[destKey];
   if (!origin || !dest) return;
 
-  directionsService.route({
-    origin: new google.maps.LatLng(origin.lat, origin.lng),
-    destination: new google.maps.LatLng(dest.lat, dest.lng),
-    travelMode: google.maps.TravelMode.DRIVING,
-    drivingOptions: {
-      departureTime: new Date(),
-      trafficModel: google.maps.TrafficModel.BEST_GUESS
-    },
-    provideRouteAlternatives: true
-  }, (result, status) => {
-    if (status === google.maps.DirectionsStatus.OK) {
-      directionsRenderer.setDirections(result);
-      updateMapTimestamp();
-    } else {
-      console.warn("Directions request failed:", status);
+  // Clear existing route polylines and markers
+  if (window._routePolylines) {
+    window._routePolylines.forEach(p => p.setMap(null));
+  }
+  if (window._routeMarkers) {
+    window._routeMarkers.forEach(m => m.setMap(null));
+  }
+  window._routePolylines = [];
+  window._routeMarkers   = [];
+
+  // Clear old directions panel
+  const panel = document.getElementById("advisory-directions-panel");
+  if (panel) panel.innerHTML = `<div style="padding:8px;color:var(--text-secondary);font-size:12px;">⏳ Fetching live route from Directions API...</div>`;
+
+  // Call backend proxy (server-side Directions API key, no CORS issue)
+  fetch("/api/directions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      origin_lat: origin.lat,
+      origin_lng: origin.lng,
+      dest_lat:   dest.lat,
+      dest_lng:   dest.lng,
+      origin_label: origin.label,
+      dest_label:   dest.label
+    })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  })
+  .then(data => {
+    if (!data.routes || data.routes.length === 0) {
+      if (panel) panel.innerHTML = `<div style="padding:8px;color:#e03e3e;font-size:12px;">⚠️ No route found between selected locations.</div>`;
+      return;
     }
+
+    // Render each route as a polyline
+    data.routes.forEach((route, idx) => {
+      if (!route.overview_polyline) return;
+      const decodedPath = google.maps.geometry.encoding.decodePath(route.overview_polyline);
+      const poly = new google.maps.Polyline({
+        path: decodedPath,
+        map: advisoryMap,
+        strokeColor:   idx === 0 ? "#2b6cb0" : "#9ca3af",
+        strokeWeight:  idx === 0 ? 7 : 4,
+        strokeOpacity: idx === 0 ? 0.9 : 0.55,
+        icons: idx === 0 ? [] : [{
+          icon: { path: "M 0,-1 0,1", strokeOpacity: 1, scale: 3 },
+          offset: "0", repeat: "14px"
+        }],
+        zIndex: idx === 0 ? 10 : 5
+      });
+      window._routePolylines.push(poly);
+
+      // Info window on click for alternative routes
+      if (idx > 0) {
+        poly.addListener("click", () => {
+          alert(`Alternative route via ${route.summary}\nDistance: ${route.distance}\nETA: ${route.duration}`);
+        });
+      }
+    });
+
+    // Fit map to first route bounds
+    if (data.routes[0] && data.routes[0].overview_polyline) {
+      const path = google.maps.geometry.encoding.decodePath(data.routes[0].overview_polyline);
+      const bounds = new google.maps.LatLngBounds();
+      path.forEach(pt => bounds.extend(pt));
+      advisoryMap.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
+    }
+
+    // Place origin & destination markers
+    const mkOrigin = new google.maps.Marker({
+      position: { lat: origin.lat, lng: origin.lng },
+      map: advisoryMap,
+      title: origin.label,
+      icon: { path: google.maps.SymbolPath.CIRCLE, scale: 9, fillColor: "#2b6cb0", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 2 },
+      label: { text: "A", color: "#fff", fontSize: "11px", fontWeight: "bold" }
+    });
+    const mkDest = new google.maps.Marker({
+      position: { lat: dest.lat, lng: dest.lng },
+      map: advisoryMap,
+      title: dest.label,
+      icon: { path: google.maps.SymbolPath.CIRCLE, scale: 9, fillColor: "#2f855a", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 2 },
+      label: { text: "B", color: "#fff", fontSize: "11px", fontWeight: "bold" }
+    });
+    window._routeMarkers.push(mkOrigin, mkDest);
+
+    // Render directions panel with ETA + steps
+    const best = data.routes[0];
+    const warnings = best.warnings && best.warnings.length > 0
+      ? `<div style="background:rgba(254,202,202,0.3);border:1px solid #f87171;border-radius:6px;padding:6px 8px;margin-bottom:6px;font-size:11px;color:#991b1b;">⚠️ ${best.warnings.join(" ")}</div>`
+      : "";
+
+    const stepsHtml = best.steps.slice(0, 12).map((s, i) =>
+      `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--color-border);">
+        <span style="color:var(--accent-blue);font-weight:600;min-width:18px;">${i + 1}.</span>
+        <span style="flex:1;font-size:11px;color:var(--text-primary);">${s.instruction.replace(/<[^>]*>/g, '')}</span>
+        <span style="font-size:10px;color:var(--text-secondary);white-space:nowrap;">${s.distance}</span>
+      </div>`
+    ).join("");
+
+    const altNote = data.total_routes > 1
+      ? `<div style="font-size:10px;color:var(--text-secondary);margin-top:4px;">+ ${data.total_routes - 1} alternative route(s) shown on map. Click to explore.</div>`
+      : "";
+
+    if (panel) panel.innerHTML = `
+      <div style="padding:8px 4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <strong style="font-size:13px;color:var(--text-primary);">📍 ${origin.label} → ${dest.label}</strong>
+          <span style="font-size:12px;background:var(--accent-blue);color:#fff;padding:2px 8px;border-radius:12px;">${best.duration}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;">Distance: ${best.distance} · Via ${best.summary}</div>
+        ${warnings}
+        ${stepsHtml}
+        ${altNote}
+      </div>`;
+
+    updateMapTimestamp();
+  })
+  .catch(err => {
+    console.warn("Directions fetch failed — falling back to DirectionsService:", err);
+    // Fallback: use JS DirectionsService (uses Maps JS key)
+    if (directionsService && directionsRenderer) {
+      directionsService.route({
+        origin: new google.maps.LatLng(origin.lat, origin.lng),
+        destination: new google.maps.LatLng(dest.lat, dest.lng),
+        travelMode: google.maps.TravelMode.DRIVING,
+        provideRouteAlternatives: true
+      }, (result, st) => {
+        if (st === google.maps.DirectionsStatus.OK) {
+          directionsRenderer.setDirections(result);
+          updateMapTimestamp();
+        }
+      });
+    }
+    if (panel) panel.innerHTML = `<div style="padding:8px;color:#dd6b20;font-size:12px;">⚡ Using fallback routing (server offline).</div>`;
   });
 }
+
 
 function updateMapTimestamp() {
   const tsEl = document.getElementById("advisory-map-ts");

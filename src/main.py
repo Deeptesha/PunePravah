@@ -45,6 +45,13 @@ PMC_EMERGENCY_PHONE = "020-25501269"
 PCMC_EMERGENCY_PHONE = "020-67333333"
 IMD_PUNE_WEBSITE = "https://imdpune.gov.in"
 
+# Dedicated Google Directions API key (server-side only, never exposed to browser)
+DIRECTIONS_API_KEY = os.environ.get(
+    "DIRECTIONS_API_KEY", "YOUR_DIRECTIONS_API_KEY"
+)
+GOOGLE_DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json"
+
+
 # Bounding boxes for ward geofencing: (min_lat, max_lat, min_lon, max_lon)
 WARD_GEOFENCES = {
     "PCMC_Low_Lying": (18.5500, 18.6800, 73.7200, 73.8500),
@@ -124,6 +131,14 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
+
+class DirectionsRequest(BaseModel):
+    origin_lat: float = Field(..., description="Origin latitude")
+    origin_lng: float = Field(..., description="Origin longitude")
+    dest_lat: float = Field(..., description="Destination latitude")
+    dest_lng: float = Field(..., description="Destination longitude")
+    origin_label: Optional[str] = ""
+    dest_label: Optional[str] = ""
 
 # ==================================================
 # API FEED CONNECTOR (Zero Mocks, Live Telemetry)
@@ -445,6 +460,94 @@ async def chat_assistant(payload: ChatRequest) -> ChatResponse:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="AI Assistant service temporarily unavailable."
         )
+
+# ==================================================
+# GOOGLE DIRECTIONS API PROXY ENDPOINT
+# ==================================================
+@app.post("/api/directions", response_model=Dict[str, Any])
+async def get_directions(request: DirectionsRequest) -> Dict[str, Any]:
+    """
+    Server-side proxy for Google Directions API.
+    Uses the dedicated Directions API key — key never exposed to browser.
+    Returns route polyline points, steps, duration, and distance.
+    """
+    origin = f"{request.origin_lat},{request.origin_lng}"
+    destination = f"{request.dest_lat},{request.dest_lng}"
+
+    params = {
+        "origin": origin,
+        "destination": destination,
+        "mode": "driving",
+        "alternatives": "true",
+        "departure_time": "now",
+        "traffic_model": "best_guess",
+        "key": DIRECTIONS_API_KEY,
+        "region": "IN",
+        "language": "en"
+    }
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        try:
+            resp = await client.get(GOOGLE_DIRECTIONS_URL, params=params)
+            if resp.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail="Directions service returned an error."
+                )
+            data = resp.json()
+        except httpx.RequestError as exc:
+            logger.error(f"Directions API request failed: {scrub_pii(str(exc))}")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Directions service is temporarily unavailable."
+            )
+
+    api_status = data.get("status", "UNKNOWN")
+    if api_status not in ("OK", "ZERO_RESULTS"):
+        logger.warning(f"Directions API status: {api_status}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Directions API returned status: {api_status}"
+        )
+
+    routes_out = []
+    for i, route in enumerate(data.get("routes", [])):
+        leg = route.get("legs", [{}])[0]
+        steps_out = []
+        for step in leg.get("steps", []):
+            steps_out.append({
+                "instruction": step.get("html_instructions", ""),
+                "distance": step.get("distance", {}).get("text", ""),
+                "duration": step.get("duration", {}).get("text", ""),
+                "polyline": step.get("polyline", {}).get("points", "")
+            })
+
+        # Duration in traffic (if available), fallback to normal duration
+        duration_traffic = leg.get("duration_in_traffic", {}).get("text", "")
+        duration_normal  = leg.get("duration", {}).get("text", "")
+
+        routes_out.append({
+            "route_index": i,
+            "summary": route.get("summary", f"Route {i + 1}"),
+            "overview_polyline": route.get("overview_polyline", {}).get("points", ""),
+            "distance": leg.get("distance", {}).get("text", ""),
+            "duration": duration_traffic or duration_normal,
+            "duration_in_traffic": duration_traffic,
+            "start_address": leg.get("start_address", request.origin_label),
+            "end_address": leg.get("end_address", request.dest_label),
+            "steps": steps_out,
+            "warnings": route.get("warnings", []),
+            "is_recommended": i == 0
+        })
+
+    return {
+        "status": api_status,
+        "origin_label": request.origin_label,
+        "dest_label": request.dest_label,
+        "routes": routes_out,
+        "total_routes": len(routes_out)
+    }
+
 
 # Serve static web files
 public_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public")
