@@ -9,13 +9,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
-  <!-- Google Maps JavaScript API -->
+  <!-- Google Maps JavaScript API — key injected at runtime from server, never hardcoded -->
   <script>
-    window.initGoogleMaps = function() {}; // will be overwritten by app.js
+    window.initGoogleMaps = function() {}; // overwritten by app.js after load
+    // Key is fetched from /api/config and Maps script is appended dynamically
+    fetch('/api/config')
+      .then(r => r.json())
+      .then(cfg => {
+        if (!cfg.maps_js_key) return;
+        var s = document.createElement('script');
+        s.async = true; s.defer = true;
+        s.src = 'https://maps.googleapis.com/maps/api/js?key=' + cfg.maps_js_key
+              + '&libraries=places,geometry&callback=initGoogleMaps';
+        document.head.appendChild(s);
+      })
+      .catch(() => console.warn('Maps config unavailable — map features disabled.'));
   </script>
-  <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=YOUR_MAPS_JS_API_KEY&libraries=places,geometry&callback=initGoogleMaps">
-  </script>
+
 </head>
 <body>
 

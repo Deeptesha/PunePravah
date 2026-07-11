@@ -45,11 +45,15 @@ PMC_EMERGENCY_PHONE = "020-25501269"
 PCMC_EMERGENCY_PHONE = "020-67333333"
 IMD_PUNE_WEBSITE = "https://imdpune.gov.in"
 
-# Dedicated Google Directions API key (server-side only, never exposed to browser)
-DIRECTIONS_API_KEY = os.environ.get(
-    "DIRECTIONS_API_KEY", "YOUR_DIRECTIONS_API_KEY"
-)
+# Dedicated Google Directions API key — loaded from environment only, never hardcoded
+# Set via Cloud Run --env-vars-file env.yaml or export DIRECTIONS_API_KEY=...
+DIRECTIONS_API_KEY = os.environ.get("DIRECTIONS_API_KEY", "")
 GOOGLE_DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json"
+
+# Google Maps JS API key — served to browser via /api/config, never committed to source
+MAPS_JS_KEY = os.environ.get("MAPS_JS_KEY", "")
+
+
 
 
 # Bounding boxes for ward geofencing: (min_lat, max_lat, min_lon, max_lon)
@@ -198,7 +202,17 @@ def resolve_ward(lat: float, lon: float) -> Tuple[str, str]:
 # ==================================================
 # ENDPOINTS
 # ==================================================
+@app.get("/api/config", response_model=Dict[str, str])
+async def get_client_config() -> Dict[str, str]:
+    """
+    Returns public-safe client configuration to the browser.
+    Only exposes the Maps JS key (browser-side key, restrict by HTTP referrer in GCP).
+    The Directions API key is NEVER returned here — it is server-side only.
+    """
+    return {"maps_js_key": MAPS_JS_KEY}
+
 @app.get("/api/weather", response_model=WeatherResponse)
+
 async def get_live_weather() -> WeatherResponse:
     """Asynchronously gathers live weather metrics directly from Open-Meteo API."""
     current_data = await fetch_live_pune_weather()
