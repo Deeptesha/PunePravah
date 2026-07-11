@@ -1,0 +1,21 @@
+{
+  "confidence_threshold": 0.95,
+  "source_weights": {
+    "IMD_Pune": 1.0,
+    "PMC_Official_Feed": 0.95,
+    "PCMC_Official_Feed": 0.95,
+    "DDMA_Alerts": 1.0,
+    "Crowdsourced_Reports": 0.40,
+    "Third_Party_Weather_API": 0.60
+  },
+  "consensus_rules": {
+    "minimum_sources_required": 2,
+    "max_acceptable_delay_seconds": 1800,
+    "conflict_penalty": 0.50
+  },
+  "calculation_logic": {
+    "base_score_formula": "Sum(source_weight * source_status) / Sum(source_weight)",
+    "agreement_multiplier": 1.1,
+    "disagreement_penalty": 0.4
+  }
+}

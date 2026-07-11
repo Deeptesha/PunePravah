@@ -1,0 +1,33 @@
+{
+  "dams": [
+    {
+      "name": "Khadakwasla",
+      "level_percent": 92.4,
+      "discharge": 12500.0
+    },
+    {
+      "name": "Panshet",
+      "level_percent": 88.1,
+      "discharge": 4500.0
+    },
+    {
+      "name": "Warasgaon",
+      "level_percent": 84.6,
+      "discharge": 3200.0
+    }
+  ],
+  "waterlogging": [
+    {
+      "ward": "Sinhagad Road Ward",
+      "severity": "CRITICAL",
+      "desc": "Ekta Nagari low-lying societies face flooding risk. Monitor Mutha River discharge levels.",
+      "status": "ACTIVE"
+    },
+    {
+      "ward": "Kothrud Ward",
+      "severity": "MEDIUM",
+      "desc": "Water accumulation near Garware College subway.",
+      "status": "ACTIVE"
+    }
+  ]
+}

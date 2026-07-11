@@ -1,0 +1,21 @@
+# Exclude virtual environment
+.venv/
+venv/
+env/
+
+# Exclude python bytecode caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Exclude OS generated files
+.DS_Store
+Thumbs.db
+
+# Exclude database files
+*.db
+*.sqlite
+
+# Exclude logs
+*.log

@@ -1,0 +1,46 @@
+{
+  "emergency_contacts": {
+    "PMC_control_room": ["020-25501269", "020-25506800"],
+    "PCMC_control_room": ["020-67333333", "020-27422222"],
+    "pune_disaster_management_cell": ["020-26123371", "020-26136655"],
+    "police": ["100", "112"],
+    "fire_brigade": ["101"],
+    "ambulance": ["108"]
+  },
+  "official_sources": {
+    "IMD_Pune": "https://imdpune.gov.in",
+    "PMC_Portal": "https://www.pmc.gov.in",
+    "PCMC_Portal": "https://www.pcmcindia.gov.in"
+  },
+  "fallback_templates": {
+    "unverified": {
+      "en": "Unverified report; please check official local authorities.",
+      "mr": "अप्रकाशित/असत्यशोधित अहवाल; कृपया अधिकृत स्थानिक प्रशासकीय यंत्रणेशी संपर्क साधा.",
+      "hi": "अपुष्ट रिपोर्ट; कृपया आधिकारिक स्थानीय अधिकारियों से जांच करें।"
+    },
+    "sensor_failure": {
+      "en": "Data stream temporarily unavailable. For your safety, please refer directly to official PMC/PCMC flood advisories.",
+      "mr": "माहिती प्रवाह तात्पुरता अनुपलब्ध आहे. आपल्या सुरक्षिततेसाठी, कृपया थेट पीएमसी/पीसीएमसी पूर सल्ला पहा.",
+      "hi": "डेटा स्ट्रीम अस्थायी रूप से अनुपलब्ध है। आपकी सुरक्षा के लिए, कृपया सीधे पीएमसी/पीसीएमसी बाढ़ सलाह देखें।"
+    },
+    "conflicting_data": {
+      "en": "Conflicting local sensor reports detected. Please exercise caution and monitor official local municipal updates.",
+      "mr": "स्थानिक सेन्सर अहवालांमध्ये विसंगती आढळली आहे. कृपया खबरदारी घ्या आणि अधिकृत स्थानिक महापालिका अपडेट्सवर लक्ष ठेवा.",
+      "hi": "स्थानीय सेंसर रिपोर्टों में विसंगति पाई गई है। कृपया सावधानी बरतें और आधिकारिक स्थानीय नगर निकाय अपडेट्स पर नज़र रखें।"
+    }
+  },
+  "emergency_advisories": {
+    "RED_Alert": {
+      "rules": ["Stay indoors", "Avoid low-lying areas near Mutha/Mula rivers", "Do not cross flooded bridges/subways (e.g., Harris Bridge, J.M. Road subway)"],
+      "en": "RED ALERT: Extremely heavy rainfall predicted. Avoid commuting. Keep emergency numbers handy. Residents in low-lying areas (Sinhagad Road, Deccan, Yerawada) should move to safer ground if water levels rise.",
+      "mr": "लाल इशारा (RED ALERT): अत्यंत मुसळधार पावसाचा अंदाज. प्रवास टाळा. आपत्कालीन क्रमांक जवळ ठेवा. सखल भागातील रहिवाशांनी (सिंहगड रस्ता, डेक्कन, येरवडा) पाणी वाढल्यास सुरक्षित स्थळी स्थलांतर करावे.",
+      "hi": "रेड अलर्ट (RED ALERT): अत्यंत भारी बारिश का अनुमान। यात्रा से बचें। आपातकालीन नंबर पास रखें। निचले इलाकों (सिंहगढ़ रोड, डेक्कन, येरवडा) के निवासी पानी बढ़ने पर सुरक्षित स्थानों पर जाएं।"
+    },
+    "ORANGE_Alert": {
+      "rules": ["Avoid travel if possible", "Check for localized waterlogging updates", "Stay away from open drains and power lines"],
+      "en": "ORANGE ALERT: Heavy to very heavy rainfall expected. Be prepared for localized waterlogging and traffic disruptions. Stay updated via official PMC channels.",
+      "mr": "केशरी इशारा (ORANGE ALERT): मुसळधार ते तीव्र मुसळधार पावसाची शक्यता. स्थानिक भागात पाणी साचण्याची आणि वाहतूक कोंडीची शक्यता. अधिकृत मनपा माध्यमावरून माहिती घेत राहा.",
+      "hi": "ऑरेंज अलर्ट (ORANGE ALERT): भारी से बहुत भारी बारिश की संभावना। स्थानीय जलजमाव और यातायात व्यवधान के लिए तैयार रहें। आधिकारिक पीएमसी चैनलों के माध्यम से अपडेट रहें।"
+    }
+  }
+}

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PunePravah - Pune Monsoon Preparedness & Alerts</title>
+  <!-- Google Fonts Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="main-header">
+    <div class="header-container">
+      <div class="logo-section">
+        <span class="logo-title">PunePravah</span>
+      </div>
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="dashboard" id="tab-dashboard-btn">
+          <svg class="icon-nav" viewBox="0 0 24 24"><path d="M4 13h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm0 8h6c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1zm10 0h6c.55 0 1-.45 1-1v-8c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zM14 4v4c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1z"/></svg>
+          <span class="nav-text" data-localize="nav_dashboard">Dashboard</span>
+        </button>
+        <button class="tab-btn" data-tab="checklist" id="tab-checklist-btn">
+          <svg class="icon-nav" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          <span class="nav-text" data-localize="nav_checklist">Checklist</span>
+        </button>
+        <button class="tab-btn" data-tab="travel" id="tab-travel-btn">
+          <svg class="icon-nav" viewBox="0 0 24 24"><path d="M20.5 3H3.5C2.67 3 2 3.67 2 4.5v15c0 .83.67 1.5 1.5 1.5h17c.83 0 1.5-.67 1.5-1.5v-15c0-.83-.67-1.5-1.5-1.5zM18 19H6v-2h12v2zm0-4H6V5h12v10z"/></svg>
+          <span class="nav-text" data-localize="nav_travel">Travel</span>
+        </button>
+        <button class="tab-btn" data-tab="settings" id="tab-settings-btn">
+          <svg class="icon-nav" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          <span class="nav-text" data-localize="nav_settings">Settings</span>
+        </button>
+      </nav>
+      <div class="header-actions">
+        <button class="action-icon-btn" id="theme-toggle-btn" aria-label="Toggle Theme">
+          <!-- Sun icon -->
+          <svg class="icon-header sun" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-12.37c-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.38.39-1.02 0-1.41zm-12.37 12.37c-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.38.39-1.02 0-1.41z"/></svg>
+          <!-- Moon icon -->
+          <svg class="icon-header moon" viewBox="0 0 24 24" style="display:none;"><path d="M12.3 22h-.1c-5.5 0-10-4.5-10-10 0-4.8 3.5-8.9 8.2-9.8.6-.1 1.2.3 1.3.9.1.6-.3 1.2-.9 1.3-3.4.7-5.9 3.7-5.9 7.3 0 4.1 3.3 7.5 7.4 7.5 3.6 0 6.6-2.6 7.3-6 .1-.6.7-1 1.3-.9.6.1 1 .7.9 1.3-.9 4.7-5 8.2-9.6 8.2z"/></svg>
+        </button>
+        <button class="action-icon-btn" aria-label="Location Settings">
+          <svg class="icon-header" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP PANELS CONTAINER -->
+  <main class="app-main">
+
+    <!-- 1. DASHBOARD VIEW -->
+    <section id="dashboard-view" class="view-panel active">
+      <div class="sos-banner" id="sos-banner-btn" style="cursor: pointer;">
+        <div class="sos-content">
+          <svg class="icon-sos" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          <span class="sos-text" data-localize="sos_btn">EMERGENCY CONTACT SOS</span>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Main stats & weather alert -->
+        <div class="dashboard-left">
+          <div class="alert-card border-red" id="dashboard-alert-card">
+            <div class="alert-header">
+              <div class="alert-title-wrapper">
+                <svg class="icon-warning" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                <h2 class="alert-title" id="dashboard-alert-title">RED ALERT: Heavy Rainfall Expected</h2>
+              </div>
+              <span class="badge badge-red" id="dashboard-alert-badge">ACTIVE</span>
+            </div>
+            <p class="alert-desc" id="dashboard-alert-desc">Severe waterlogging reported in Deccan Gymkhana and Kothrud. Avoid unnecessary travel.</p>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card card-intensity">
+              <span class="metric-label" data-localize="intensity_label">Current Intensity</span>
+              <div class="metric-value-container">
+                <span class="metric-value" id="dashboard-intensity-val">0</span>
+                <span class="metric-unit">mm/h</span>
+              </div>
+            </div>
+            <div class="metric-card card-river">
+              <span class="metric-label" data-localize="river_label">River Mutha Level</span>
+              <div class="metric-value-container">
+                <span class="metric-value color-danger">14.2</span>
+                <span class="metric-unit">m</span>
+              </div>
+              <span class="metric-subtext color-danger" data-localize="river_subtext">▲ Approaching Danger Level</span>
+            </div>
+            <div class="metric-card card-dam" id="dashboard-dam-card" style="border-left: 4px solid var(--accent-blue);">
+              <span class="metric-label" style="font-weight: 600;">PMC Dam Releases</span>
+              <div class="metric-value-container">
+                <span class="metric-value" id="dashboard-dam-val">--</span>
+                <span class="metric-unit">cusecs</span>
+              </div>
+              <span class="metric-subtext" id="dashboard-dam-sub" style="color: var(--text-secondary);">● Fetching PMC data...</span>
+            </div>
+          </div>
+
+          <div class="weather-widgets">
+            <div class="widget-card">
+              <svg class="widget-icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              <div class="widget-details">
+                <span class="widget-label" data-localize="humidity">Humidity</span>
+                <span class="widget-value">88%</span>
+              </div>
+            </div>
+            <div class="widget-card">
+              <svg class="widget-icon" viewBox="0 0 24 24"><path d="M13.96 12.29l-2.07-2.07a3.99 3.99 0 0 0-4.01-1.02L8.5 7.82c2.19-.9 4.88-.36 6.52 1.28l1.06 1.06c.39.39 1.03.39 1.42 0L21 6.59c.39-.39.39-1.03 0-1.42l-1.06-1.06c-.39-.39-1.03-.39-1.42 0L17.1 5.53l-1.06-1.06a9.96 9.96 0 0 0-14.15 0c-.39.39-.39 1.03 0 1.42l1.06 1.06c.39.39 1.03.39 1.42 0L5.43 5.89a6.002 6.002 0 0 1 8.53 0l1.06 1.06a3.991 3.991 0 0 0 1.01 4.02l-2.07 1.32z"/></svg>
+              <div class="widget-details">
+                <span class="widget-label" data-localize="wind">Wind</span>
+                <span class="widget-value">18 km/h</span>
+              </div>
+            </div>
+            <div class="widget-card">
+              <svg class="widget-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+              <div class="widget-details">
+                <span class="widget-label" data-localize="visibility">Visibility</span>
+                <span class="widget-value">1.2 km</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Map / Risk Tracker -->
+        <div class="dashboard-right">
+          <div class="risk-card">
+            <div class="risk-header">
+              <div class="risk-title-wrapper">
+                <svg class="icon-small" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <h3 class="risk-title" data-localize="flood_risk_title">Localized Flood Risk</h3>
+              </div>
+            </div>
+            
+            <div class="toggle-bar">
+              <button class="toggle-btn active" id="risk-water-btn" data-localize="toggle_water">Water Level</button>
+              <button class="toggle-btn" id="risk-traffic-btn" data-localize="toggle_traffic">Traffic</button>
+            </div>
+
+            <!-- Mini map visualization (using SVG vector drawing to look highly premium) -->
+            <div class="map-container-mini">
+              <svg class="pune-map-svg" viewBox="0 0 400 300">
+                <!-- Background grid -->
+                <defs>
+                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0,0,0,0.03)" stroke-width="1"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" class="map-bg"/>
+
+                <!-- Mutha & Mula Rivers -->
+                <path d="M 0,220 C 120,220 160,180 200,150 C 240,120 280,100 400,90" fill="none" stroke="#5fa6e6" stroke-width="18" opacity="0.6" class="map-river"/>
+                <path d="M 0,100 C 100,110 150,130 200,150" fill="none" stroke="#5fa6e6" stroke-width="14" opacity="0.6" class="map-river"/>
+                <text x="210" y="135" class="map-river-label" font-size="10" fill="#2d6ea3">Mutha River</text>
+
+                <!-- Road networks -->
+                <path class="road-path road-safe" d="M 50,50 L 350,50 L 350,250 L 50,250 Z"/>
+                <path class="road-path road-warning" d="M 50,150 L 350,150"/>
+                <path class="road-path road-danger" d="M 200,50 L 200,250"/>
+
+                <!-- Sinhagad Road Red Zone Overlay -->
+                <path d="M 80,210 C 110,210 140,230 160,250" fill="none" stroke="#e03e3e" stroke-width="16" stroke-linecap="round" opacity="0.45" id="sinhagad-risk-zone"/>
+
+                <!-- Warning Pins -->
+                <g class="map-pin" transform="translate(200, 150)">
+                  <circle r="14" class="pin-pulse pin-red"/>
+                  <path d="M0 -9 L8 5 L-8 5 Z" fill="#ffffff" transform="scale(0.7) translate(0, -2)"/>
+                </g>
+                <g class="map-pin" transform="translate(100, 220)">
+                  <circle r="12" class="pin-pulse pin-orange"/>
+                  <circle r="5" fill="#ffffff"/>
+                </g>
+
+                <!-- Labels -->
+                <text x="200" y="180" class="map-lbl bold">Deccan</text>
+                <text x="70" y="245" class="map-lbl danger">Sinhagad Rd</text>
+                <text x="280" y="220" class="map-lbl">Kothrud</text>
+                <text x="310" y="80" class="map-lbl">Yerawada</text>
+              </svg>
+
+              <div class="map-legend">
+                <div class="legend-item"><span class="legend-dot dot-red"></span><span data-localize="legend_high">High Risk</span></div>
+                <div class="legend-item"><span class="legend-dot dot-orange"></span><span data-localize="legend_mod">Moderate Risk</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. CHECKLIST VIEW -->
+    <section id="checklist-view" class="view-panel">
+      <div class="checklist-header-section">
+        <h1 class="page-title" data-localize="checklist_title">Monsoon Preparedness</h1>
+        <p class="page-subtitle" data-localize="checklist_subtitle">Complete these crucial tasks to ensure safety during heavy rainfall.</p>
+      </div>
+
+      <!-- Overall progress bar matching variant exactly -->
+      <div class="progress-container">
+        <div class="progress-meta">
+          <span class="progress-title" data-localize="progress_lbl">Overall Progress</span>
+          <span class="progress-percentage" id="progress-percent-val">25%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-bar-fill-indicator" style="width: 25%;"></div>
+        </div>
+      </div>
+
+      <div class="checklist-grid">
+        <!-- A. Home Safety / Preparation Card -->
+        <div class="checklist-card">
+          <div class="checklist-card-header">
+            <svg class="icon-small text-blue" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <h3 class="card-title" data-localize="home_safety_title">Home Preparation</h3>
+          </div>
+          <div class="checklist-items-list" id="home-safety-list">
+            <!-- Items -->
+            <label class="chk-item border-red-bg" id="item-gutters-label">
+              <input type="checkbox" checked id="item-gutters" class="checklist-input">
+              <span class="chk-box"></span>
+              <div class="chk-text">
+                <strong data-localize="chk_gutters_title">Clear Gutters & Drains</strong>
+                <p data-localize="chk_gutters_desc">Remove leaves and debris to prevent waterlogging around foundation.</p>
+              </div>
+            </label>
+            <label class="chk-item">
+              <input type="checkbox" id="item-electricals" class="checklist-input">
+              <span class="chk-box"></span>
+              <div class="chk-text">
+                <strong data-localize="chk_electricals_title">Secure Electricals</strong>
+                <p data-localize="chk_electricals_desc">Elevate ground-level appliances and cover exposed wiring.</p>
+              </div>
+            </label>
+            <label class="chk-item">
+              <input type="checkbox" id="item-roof" class="checklist-input">
+              <span class="chk-box"></span>
+              <div class="chk-text">
+                <strong data-localize="chk_roof_title">Check Roof for Leaks</strong>
+                <p data-localize="chk_roof_desc">Inspect tiles and apply waterproof sealant where necessary.</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- B. Emergency Kit Card -->
+        <div class="checklist-card">
+          <div class="checklist-card-header">
+            <svg class="icon-small text-blue" viewBox="0 0 24 24"><path d="M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z"/></svg>
+            <h3 class="card-title" data-localize="emergency_kit_title">Emergency Kit</h3>
+          </div>
+          <div class="checklist-items-list" id="emergency-kit-list">
+            <label class="chk-item">
+              <input type="checkbox" id="item-water" class="checklist-input">
+              <span class="chk-box"></span>
+              <div class="chk-text">
+                <strong data-localize="chk_water_title">Drinking Water</strong>
+                <p data-localize="chk_water_desc">Store at least 5 liters per person for 3 days.</p>
+              </div>
+            </label>
+            <label class="chk-item">
+              <input type="checkbox" id="item-meds" class="checklist-input">
+              <span class="chk-box"></span>
+              <div class="chk-text">
+                <strong data-localize="chk_meds_title">First Aid & Meds</strong>
+                <p data-localize="chk_meds_desc">Fully stocked first aid kit and essential prescription medications.</p>
+              </div>
+            </label>
+            <label class="chk-item">
+              <input type="checkbox" id="item-flashlight" class="checklist-input">
+              <span class="chk-box"></span>
+              <div class="chk-text">
+                <strong data-localize="chk_flashlight_title">Flashlights & Batteries</strong>
+                <p data-localize="chk_flashlight_desc">Ensure functional flashlights and extra waterproof batteries.</p>
+              </div>
+            </label>
+            <label class="chk-item">
+              <input type="checkbox" id="item-umbrella" class="checklist-input">
+              <span class="chk-box"></span>
+              <div class="chk-text">
+                <strong data-localize="chk_umbrella_title">Umbrella & Raincoat</strong>
+                <p data-localize="chk_umbrella_desc">Keep premium rain gear ready for all family members.</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- C. Documents Card -->
+        <div class="checklist-card">
+          <div class="checklist-card-header">
+            <svg class="icon-small text-blue" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            <h3 class="card-title" data-localize="documents_title">Documents</h3>
+          </div>
+          <div class="checklist-items-list" id="documents-list">
+            <label class="chk-item">
+              <input type="checkbox" id="item-doc-id" class="checklist-input">
+              <span class="chk-box"></span>
+              <div class="chk-text">
+                <strong data-localize="chk_docs_title">ID, Insurance, House Papers</strong>
+                <p data-localize="chk_docs_desc">Keep documents safe in waterproof zip-lock bags.</p>
+              </div>
+            </label>
+            <label class="chk-item">
+              <input type="checkbox" id="item-doc-contacts" class="checklist-input">
+              <span class="chk-box"></span>
+              <div class="chk-text">
+                <strong data-localize="chk_contacts_title">Hardcopy of Emergency Contacts</strong>
+                <p data-localize="chk_contacts_desc">Printed backup list in case of network outages.</p>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sync Progress button -->
+      <div class="checklist-actions">
+        <button class="action-btn" id="sync-progress-btn">
+          <svg class="icon-btn-svg" viewBox="0 0 24 24"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L5.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></svg>
+          <span data-localize="sync_btn">SYNC PROGRESS</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. TRAVEL VIEW -->
+    <section id="travel-view" class="view-panel">
+      <!-- Toggle for Travel Variants -->
+      <div class="travel-variant-selector">
+        <button class="variant-tab-btn active" id="btn-variant-advisory">Route Advisor</button>
+        <button class="variant-tab-btn" id="btn-variant-flows">Live Traffic Map</button>
+      </div>
+
+      <!-- VARIANT B: ROUTE ADVISOR SCREEN -->
+      <div class="travel-variant-content active" id="variant-advisory-panel">
+        <div class="travel-advisor-container">
+          <!-- Left Planner Menu -->
+          <div class="planner-sidebar">
+            <h2 class="sidebar-title" data-localize="travel_advisory_title">Travel Advisory</h2>
+            
+            <div class="search-input-group">
+              <div class="input-with-icon">
+                <svg class="icon-input" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <select id="route-origin" class="loc-input-select">
+                  <option value="kothrud">Kothrud, Pune</option>
+                  <option value="baner">Baner, Pune</option>
+                  <option value="hinjawadi">Hinjawadi, Pune</option>
+                  <option value="sinhagad">Sinhagad Road, Pune</option>
+                </select>
+              </div>
+              <div class="input-with-icon border-top-none">
+                <svg class="icon-input" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <select id="route-destination" class="loc-input-select">
+                  <option value="shivaji_nagar">Shivaji Nagar</option>
+                  <option value="deccan">Deccan Gymkhana</option>
+                  <option value="yerawada">Yerawada</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="alerts-sidebar-section">
+              <span class="section-label" data-localize="active_alerts_lbl">ACTIVE ALERTS ON ROUTE</span>
+              
+              <div class="alert-item-box item-submerged">
+                <div class="alert-box-header">
+                  <span class="bullet bullet-red"></span>
+                  <strong data-localize="waterlogging_title">Severe Waterlogging</strong>
+                </div>
+                <p class="alert-box-text" data-localize="waterlogging_desc">Karve Road near Garware College is submerged. Avoid this route.</p>
+                <span class="delay-tag tag-red" data-localize="delay_25">Delay: +25 mins</span>
+              </div>
+
+              <div class="alert-item-box item-congested">
+                <div class="alert-box-header">
+                  <span class="bullet bullet-orange"></span>
+                  <strong data-localize="congestion_title">Heavy Congestion</strong>
+                </div>
+                <p class="alert-box-text" data-localize="congestion_desc">Slow moving traffic on FC Road due to diversions.</p>
+              </div>
+
+              <div class="alert-item-box item-safe-route">
+                <div class="alert-box-header">
+                  <svg class="icon-small text-blue" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                  <strong data-localize="recommended_route_title">Recommended Safe Route</strong>
+                </div>
+                <p class="alert-box-text" data-localize="recommended_route_desc">Take Senapati Bapat Road → University Circle. Clear path, estimated 18 mins.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Map -->
+          <div class="advisor-map-area">
+            <!-- Map Card Header style -->
+            <div class="map-title-bar">
+              <span class="map-title-text">PUNE TRAVEL ADVISORY MAP</span>
+              <span class="map-timestamp-text">10:34 AM | Oct 26, 2026</span>
+            </div>
+            
+            <div class="map-view-canvas">
+              <svg class="pune-route-svg" viewBox="0 0 600 450">
+                <rect width="100%" height="100%" fill="rgba(0,0,0,0.02)" class="map-canvas-bg"/>
+                <!-- Rivers -->
+                <path d="M 0,320 C 180,320 240,240 320,200 C 400,160 480,140 600,130" fill="none" stroke="#5fa6e6" stroke-width="24" opacity="0.4"/>
+                <text x="350" y="180" class="map-river-text">Mutha River</text>
+
+                <!-- Kothrud Route (Red - Closed) -->
+                <path d="M 120,400 L 250,300 L 320,200 L 320,100" fill="none" stroke="#e03e3e" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" class="path-closed"/>
+                
+                <!-- SB Road Safe Route (Blue) -->
+                <path d="M 120,400 L 80,300 L 100,180 L 200,130 L 320,100" fill="none" stroke="#2b6cb0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" class="path-safe"/>
+                
+                <!-- FC Road Link -->
+                <path d="M 320,200 L 400,180" fill="none" stroke="#dd6b20" stroke-width="6" stroke-linecap="round" stroke-dasharray="4,4"/>
+
+                <!-- Markers -->
+                <g class="map-marker" id="map-origin-marker" transform="translate(120,400)">
+                  <circle r="12" fill="#2b6cb0" opacity="0.3"/>
+                  <circle r="6" fill="#2b6cb0"/>
+                  <text y="24" class="marker-lbl" id="map-origin-lbl">Kothrud (Origin)</text>
+                </g>
+                <g class="map-marker" id="map-dest-marker" transform="translate(320,100)">
+                  <circle r="12" fill="#2f855a" opacity="0.3"/>
+                  <circle r="6" fill="#2f855a"/>
+                  <text y="-18" class="marker-lbl" id="map-dest-lbl">Shivaji Nagar (Dest)</text>
+                </g>
+                <g class="map-marker" id="map-warning-marker" transform="translate(250,300)">
+                  <circle r="10" fill="#e03e3e" opacity="0.3"/>
+                  <circle r="5" fill="#e03e3e"/>
+                </g>
+
+                <!-- Alert Boxes on Map -->
+                <g id="map-alert-card-group" transform="translate(250,260)">
+                  <rect x="-65" y="-12" width="130" height="24" rx="4" fill="#ffffff" stroke="#e03e3e" stroke-width="2" class="map-alert-card"/>
+                  <text id="map-alert-card-text" text-anchor="middle" y="4" font-size="10" font-weight="bold" fill="#c53030">Karve Rd Closed</text>
+                </g>
+
+                <!-- Route Directions Arrows -->
+                <path d="M 90,260 L 95,250 L 90,240" fill="none" stroke="#2b6cb0" stroke-width="2"/>
+                <path d="M 140,160 L 150,155 L 145,145" fill="none" stroke="#2b6cb0" stroke-width="2"/>
+              </svg>
+
+              <!-- Layer Overlay controls -->
+              <div class="map-controls-overlay">
+                <button class="overlay-btn" aria-label="Layers">
+                  <svg viewBox="0 0 24 24"><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg>
+                </button>
+                <button class="overlay-btn" aria-label="Recenter">
+                  <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm9.44 3C20.94 7.53 18.11 4.7 14.5 4.18V2h-5v2.18C5.94 4.7 3.11 7.53 2.56 11H1v2h1.56c.55 3.47 3.38 6.3 6.94 6.82V22h5v-2.18c3.61-.52 6.44-3.35 6.94-6.82H23v-2h-1.56zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="map-footer-label">
+              <span>PUNE SMART CITY | TRAFFIC POLICE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VARIANT C: LIVE TRAFFIC MAP / ALL FLOWS -->
+      <div class="travel-variant-content" id="variant-flows-panel">
+        <div class="flows-header-filters">
+          <div class="search-box-bar">
+            <input type="text" placeholder="Search locality (e.g., Baner, Kothrud, Hinjewadi)" class="flows-search-input">
+            <button class="flows-filter-btn">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/></svg>
+              <span>Filter</span>
+            </button>
+            <button class="flows-nearme-btn" id="flows-nearme-btn">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm9.44 3c-.55-3.47-3.38-6.3-6.94-6.82V2h-5v2.18C5.94 4.7 3.11 7.53 2.56 11H1v2h1.56c.55 3.47 3.38 6.3 6.94 6.82V22h5v-2.18c3.61-.52 6.44-3.35 6.94-6.82H23v-2h-1.56z"/></svg>
+              <span>Near Me</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flows-dashboard-layout">
+          <!-- Main full map -->
+          <div class="flows-map-main">
+            <!-- Selector filters -->
+            <div class="flows-pill-selectors">
+              <button class="pill-btn active">All Flows</button>
+              <button class="pill-btn">Waterlogging</button>
+              <button class="pill-btn">Traffic Density</button>
+            </div>
+
+            <div class="map-view-canvas-full">
+              <svg class="pune-flows-svg" viewBox="0 0 600 450">
+                <rect width="100%" height="100%" fill="rgba(0,0,0,0.02)" class="map-canvas-bg"/>
+                <!-- River -->
+                <path d="M 0,280 C 180,290 220,220 300,190 C 380,160 480,150 600,140" fill="none" stroke="#5fa6e6" stroke-width="20" opacity="0.4"/>
+                
+                <!-- Main Grid Roads (Aundh, Baner, Kothrud, Swargate) -->
+                <!-- Aundh Rd -->
+                <path d="M 150,50 L 300,190" fill="none" stroke="#2f855a" stroke-width="6"/>
+                <!-- Baner Rd -->
+                <path d="M 80,120 L 300,190" fill="none" stroke="#dd6b20" stroke-width="6"/>
+                <!-- Karve Rd -->
+                <path d="M 120,380 L 300,190" fill="none" stroke="#e03e3e" stroke-width="8"/>
+                <!-- Satara Rd (Swargate) -->
+                <path d="M 300,190 L 350,420" fill="none" stroke="#dd6b20" stroke-width="6"/>
+                <!-- Solapur Rd -->
+                <path d="M 300,190 L 550,300" fill="none" stroke="#2f855a" stroke-width="6"/>
+                <!-- Ahmednagar Rd -->
+                <path d="M 300,190 L 500,80" fill="none" stroke="#2f855a" stroke-width="6"/>
+
+                <!-- Warning Pins -->
+                <!-- Sinhagad Rd -->
+                <g class="map-pin" transform="translate(180,330)">
+                  <circle r="12" class="pin-pulse pin-red"/>
+                  <circle r="4" fill="#ffffff"/>
+                </g>
+                <!-- Swargate -->
+                <g class="map-pin" transform="translate(300,230)">
+                  <circle r="10" class="pin-pulse pin-orange"/>
+                  <circle r="3" fill="#ffffff"/>
+                </g>
+
+                <!-- Labels -->
+                <text x="315" y="195" font-size="12" font-weight="bold">Pune Centre</text>
+                <text x="80" y="100" font-size="10">Baner</text>
+                <text x="120" y="45" font-size="10">Aundh</text>
+                <text x="70" y="380" font-size="10">Kothrud</text>
+                <text x="350" y="360" font-size="10">Swargate</text>
+              </svg>
+
+              <!-- Zoom Controls -->
+              <div class="flows-zoom-controls">
+                <button class="zoom-btn">+</button>
+                <button class="zoom-btn">-</button>
+                <button class="zoom-btn loc-btn">
+                  <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm9.44 3c-.55-3.47-3.38-6.3-6.94-6.82V2h-5v2.18C5.94 4.7 3.11 7.53 2.56 11H1v2h1.56c.55 3.47 3.38 6.3 6.94 6.82V22h5v-2.18c3.61-.52 6.44-3.35 6.94-6.82H23v-2h-1.56z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Sidebar: Active Advisories -->
+          <div class="flows-sidebar-right">
+            <h3 class="flows-sidebar-title" data-localize="active_advisories_title">Active Advisories</h3>
+            <p class="flows-sidebar-desc" data-localize="active_advisories_subtitle">Real-time updates for Pune</p>
+            
+            <div class="flows-search-sidebar-box">
+              <svg viewBox="0 0 24 24" width="16" height="16" class="search-sidebar-icon"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+              <input type="text" placeholder="Search routes or areas..." class="sidebar-search-input-field">
+            </div>
+
+            <div class="advisory-cards-list">
+              <div class="adv-card border-red">
+                <div class="adv-card-header">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#e03e3e"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                  <strong class="adv-card-title" data-localize="submerged_title">Severe Waterlogging</strong>
+                </div>
+                <p class="adv-card-desc" data-localize="sinhagad_submerged_desc">Sinhagad Road underpass is completely submerged. Divert via bypass immediately.</p>
+                <span class="adv-card-time" data-localize="time_2m">Updated 2m ago</span>
+              </div>
+
+              <div class="adv-card border-blue">
+                <div class="adv-card-header">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#2b6cb0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                  <strong class="adv-card-title" data-localize="congestion_swargate_title">Heavy Congestion</strong>
+                </div>
+                <p class="adv-card-desc" data-localize="swargate_desc">Swargate intersection experiencing 45+ minute delays due to ongoing metro work.</p>
+                <span class="adv-card-time" data-localize="time_15m">Updated 15m ago</span>
+              </div>
+
+              <div class="adv-card border-dark">
+                <div class="adv-card-header">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#2d3748"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                  <strong class="adv-card-title" data-localize="road_closed_title">Route Closed</strong>
+                </div>
+                <p class="adv-card-desc" data-localize="koregaon_closed_desc">Koregaon Park North Main Road sealed for emergency repairs. Seek alternatives.</p>
+                <span class="adv-card-time" data-localize="time_1h">Updated 1h ago</span>
+              </div>
+            </div>
+
+            <!-- Demo helper triggers requested in sidebar layout footer -->
+            <div class="sidebar-debug-controls">
+              <button class="dbg-trigger-btn" id="dbg-show-loader">Show Loader</button>
+              <button class="dbg-trigger-btn" id="dbg-show-error">Show Error</button>
+              <button class="dbg-trigger-btn" id="dbg-show-map">Show Map</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. SETTINGS VIEW -->
+    <section id="settings-view" class="view-panel">
+      <div class="settings-container-wrapper">
+        <h1 class="page-title" data-localize="settings_title">Settings</h1>
+        <p class="page-subtitle" data-localize="settings_subtitle">Configure your personal preferences for monsoon alerts and app behavior.</p>
+
+        <div class="settings-grid">
+          <!-- Left/Main Config Area -->
+          <div class="settings-config-left">
+            <!-- Language Card -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <svg class="icon-small text-blue" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.43 3.39 1.69 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.33-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.43-3.39-1.69-4.33-3.56zm2.95-8H5.08c.94-1.87 2.49-3.13 4.33-3.56-.6 1.11-1.06 2.31-1.38 3.56zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.34-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.34.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.94 1.87-2.49 3.13-4.33 3.56zM16.36 14c.08-.66.14-1.34.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></svg>
+                <h3 class="card-title" data-localize="pref_language">Preferred Language</h3>
+              </div>
+              <div class="lang-selector-grid">
+                <button class="lang-btn active" data-lang="en">
+                  <span class="lang-main">English</span>
+                  <span class="lang-sub">Default</span>
+                </button>
+                <button class="lang-btn" data-lang="hi">
+                  <span class="lang-main">हिन्दी</span>
+                  <span class="lang-sub">Hindi</span>
+                </button>
+                <button class="lang-btn" data-lang="mr">
+                  <span class="lang-main">मराठी</span>
+                  <span class="lang-sub">Marathi</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Notifications Card -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <svg class="icon-small text-blue" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                <h3 class="card-title" data-localize="alert_notifications">Alert Notifications</h3>
+              </div>
+              <div class="settings-toggles-list">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <strong data-localize="push_notif_title">Push Notifications</strong>
+                    <p data-localize="push_notif_desc">Receive instant alerts directly on your device screen. Recommended for fastest response.</p>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="pref-push-notif" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="toggle-row border-top">
+                  <div class="toggle-info">
+                    <strong data-localize="sms_notif_title">SMS Messages</strong>
+                    <p data-localize="sms_notif_desc">Receive text messages. Useful when internet connectivity is poor during heavy rains.</p>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="pref-sms-notif">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-footer-actions">
+              <button class="action-btn outline-btn" id="settings-reset-btn" data-localize="btn_reset">Reset Defaults</button>
+              <button class="action-btn" id="settings-save-btn">
+                <svg class="icon-btn-svg" viewBox="0 0 24 24" style="fill:none; stroke:currentColor; stroke-width:2;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span data-localize="btn_save">Save Preferences</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right/Connected Account sidebar -->
+          <div class="settings-config-right">
+            <!-- Profile Card -->
+            <div class="account-card">
+              <span class="account-sub" data-localize="connected_account">CONNECTED ACCOUNT</span>
+              <h2 class="account-name" data-localize="pune_resident">Pune Resident</h2>
+              <p class="account-phone">+91 •••• •• 4521</p>
+              <button class="account-action-btn" data-localize="edit_identity">Edit Identity</button>
+            </div>
+
+            <!-- Custom SOS Contacts Card -->
+            <div class="account-card" style="margin-top: 20px; background-color: var(--bg-secondary); border: 1px solid var(--color-border); color: var(--text-primary);">
+              <span class="account-sub" style="color: var(--text-muted);">EMERGENCY SOS CONTACTS (SQL)</span>
+              
+              <div id="db-contacts-list" style="margin: 12px 0; display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto; padding-right: 4px;">
+                <!-- Dynamically loaded from SQLite -->
+              </div>
+
+              <!-- Quick Add Form -->
+              <div style="border-top: 1px solid var(--color-border); padding-top: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+                <span class="account-sub" style="color: var(--text-muted);">ADD CUSTOM SOS CONTACT</span>
+                <input type="text" id="new-contact-name" placeholder="Contact Name" style="width: 100%; padding: 6px 10px; font-size: 12px; border: 1px solid var(--color-border); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); outline: none;">
+                <input type="text" id="new-contact-phone" placeholder="Phone Number" style="width: 100%; padding: 6px 10px; font-size: 12px; border: 1px solid var(--color-border); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); outline: none;">
+                <button class="account-action-btn" id="db-add-contact-btn" style="background-color: var(--accent-blue); color: #ffffff;">Add Contact</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- OVERLAY DIALOGS -->
+
+  <!-- A. SYSTEM ALERT: CONNECTION LOST (Sync Failure Modal) -->
+  <div class="overlay-modal" id="sync-failure-modal">
+    <div class="modal-card">
+      <div class="modal-header-bar">
+        <svg class="icon-small fill-white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>
+        <span class="modal-header-text" data-localize="system_alert">SYSTEM ALERT: CONNECTION LOST</span>
+      </div>
+      <div class="modal-content">
+        <!-- Broken Wi-Fi icon -->
+        <svg class="icon-sync-failed" viewBox="0 0 24 24"><path d="M23.64 5.64C23.07 5.11 18.59 1.5 12 1.5S.93 5.11.36 5.64c-.48.45-.48 1.22 0 1.67L11.16 18c.46.43 1.21.43 1.67 0l10.81-10.69c.47-.45.47-1.22 0-1.67zm-11.64 10.3l-7.92-7.83c1.78-1.24 4.54-2.11 7.92-2.11s6.14.87 7.92 2.11L12 15.94z" opacity="0.3"/><path d="M12 7c-3.38 0-6.14.87-7.92 2.11L12 15.94l7.92-6.83C18.14 7.87 15.38 7 12 7z"/><line x1="1" y1="1" x2="23" y2="23" stroke="#e03e3e" stroke-width="3" stroke-linecap="round"/></svg>
+        
+        <h2 class="modal-title" data-localize="sync_failed">Sync Failed</h2>
+        <p class="modal-description" data-localize="sync_failed_desc">Unable to retrieve your emergency safety checklist data. This is typically due to poor connectivity or heavy rain disrupting network signals in the area.</p>
+
+        <div class="modal-actions-grid">
+          <button class="action-btn" id="modal-retry-btn" data-localize="btn_retry">Retry Connection</button>
+          <button class="action-btn outline-btn" id="modal-offline-btn" data-localize="btn_offline">View Offline Cached Data</button>
+        </div>
+
+        <div class="offline-availability-card">
+          <div class="offline-header">
+            <svg class="icon-small text-dark" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <strong data-localize="offline_mode_title">Offline Mode Availability</strong>
+          </div>
+          <p class="offline-desc" data-localize="offline_mode_desc">Critical preparedness items accessed recently are still available offline. High-contrast mode remains active to ensure readability.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B. EMERGENCY SOS CONTACTS MODAL -->
+  <div class="overlay-modal" id="sos-modal" style="display: none;">
+    <div class="modal-card" style="border-left: 6px solid var(--color-red); max-width: 480px; width: 90%;">
+      <div class="modal-header-bar" style="background-color: var(--color-red);">
+        <svg class="icon-small fill-white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <span class="modal-header-text" data-localize="sos_btn">EMERGENCY CONTACT SOS</span>
+      </div>
+      <div class="modal-content">
+        <h2 class="modal-title" style="color: var(--color-red); font-size: 20px; font-weight: 700; margin-bottom: 8px;">Emergency Helpdesk</h2>
+        <p class="modal-description" style="margin-bottom: 16px;">If you are facing waterlogging, rising floodwaters, or urgent emergency events in Pune, contact the disaster cell numbers below:</p>
+        
+        <div id="modal-sos-contacts-list" style="margin: 12px 0; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;">
+          <!-- Dynamically populated from SQLite DB -->
+        </div>
+
+        <div class="modal-actions-grid" style="grid-template-columns: 1fr; margin-top: 16px;">
+          <button class="action-btn" id="modal-sos-close-btn" style="background-color: var(--text-primary); color: #ffffff;">Close Window</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading state indicator in flow view -->
+  <div class="overlay-modal" id="flows-loader-modal" style="display: none;">
+    <div class="loader-card">
+      <div class="spinner"></div>
+      <p style="margin-top: 15px; font-weight: 500;" data-localize="fetching_telemetry">Fetching live telemetry...</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
