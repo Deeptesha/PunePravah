@@ -1,0 +1,10 @@
+# Exclude folders and files from gcloud build uploads
+.git
+.gitignore
+.venv
+.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+tests/
+.env
