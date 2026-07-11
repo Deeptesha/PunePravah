@@ -1533,34 +1533,10 @@ function getMapStyle() {
   ];
 }
 
-// Show key banner if Maps API failed to load
+// Banner is hidden — API key is embedded directly in HTML
 document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    if (typeof google === "undefined" || typeof google.maps === "undefined") {
-      const banner = document.getElementById("gmaps-key-banner");
-      if (banner) banner.style.display = "flex";
-    }
-  }, 2500);
-
-  // API Key save button
-  const saveKeyBtn = document.getElementById("gmaps-key-save-btn");
-  if (saveKeyBtn) {
-    saveKeyBtn.addEventListener("click", () => {
-      const key = document.getElementById("gmaps-key-input")?.value?.trim();
-      if (!key || key.length < 10) {
-        alert("Please enter a valid Google Maps API key (starts with AIza...).");
-        return;
-      }
-      localStorage.setItem("punepravah_gmaps_key", key);
-      window.GMAPS_KEY = key;
-      // Dynamically load the Maps API
-      const s = document.createElement("script");
-      s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places,directions&callback=initGoogleMaps`;
-      s.async = true; s.defer = true;
-      document.head.appendChild(s);
-      const banner = document.getElementById("gmaps-key-banner");
-      if (banner) banner.innerHTML = `<div class="gmaps-key-inner"><span style="color:#2f855a;">✓ Activating Google Maps...</span></div>`;
-    });
-  }
+  const banner = document.getElementById("gmaps-key-banner");
+  if (banner) banner.style.display = "none";
 });
+
 
