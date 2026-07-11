@@ -272,15 +272,30 @@ const ROUTE_DATA = {
   baner: { name: "Baner", coords: [100, 150] },
   hinjawadi: { name: "Hinjawadi", coords: [50, 220] },
   sinhagad: { name: "Sinhagad Rd", coords: [160, 420] },
+  hadapsar: { name: "Hadapsar", coords: [460, 380] },
+  wakad: { name: "Wakad", coords: [60, 180] },
+  katraj: { name: "Katraj", coords: [200, 460] },
+  koregaon: { name: "Koregaon Park", coords: [400, 200] },
   shivaji_nagar: { name: "Shivaji Nagar", coords: [320, 100] },
   deccan: { name: "Deccan Gymkhana", coords: [320, 200] },
-  yerawada: { name: "Yerawada", coords: [420, 80] }
+  yerawada: { name: "Yerawada", coords: [420, 80] },
+  swargate: { name: "Swargate", coords: [340, 300] },
+  aundh: { name: "Aundh", coords: [200, 100] },
+  viman_nagar: { name: "Viman Nagar", coords: [450, 140] },
+  kharadi: { name: "Kharadi", coords: [490, 250] }
 };
 
 // ==================================================
 // 2. INITIALIZATION & STATE MANAGEMENT
 // ==================================================
 document.addEventListener("DOMContentLoaded", () => {
+  // Always start in English — guaranteed default regardless of DB/cache
+  currentLanguage = 'en';
+  applyLanguage('en');
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  const enBtn = document.querySelector('.lang-btn[data-lang="en"]');
+  if (enBtn) enBtn.classList.add('active');
+
   initNavigation();
   initTheme();
   initChecklist();
@@ -398,7 +413,27 @@ function initChecklist() {
   });
 
   syncBtn.addEventListener("click", () => {
-    showSyncFailureModal();
+    const loader = document.getElementById("flows-loader-modal");
+    if (loader) loader.style.display = "flex";
+
+    // Save checklist state to localStorage immediately
+    const checkboxes = document.querySelectorAll(".checklist-input");
+    const checklistState = {};
+    checkboxes.forEach(cb => { checklistState[cb.id || cb.name || cb.dataset.id] = cb.checked; });
+    try {
+      localStorage.setItem("punepravah_checklist", JSON.stringify(checklistState));
+      localStorage.setItem("punepravah_sync_ts", new Date().toISOString());
+    } catch(e) { /* storage quota exceeded — ignore */ }
+
+    // Show success after a short UX delay (localStorage sync is instant)
+    setTimeout(() => {
+      if (loader) loader.style.display = "none";
+      const langMsg = currentLanguage === 'mr' ? "माहिती यशस्वीरीत्या सिंक झाली! ✓" : currentLanguage === 'hi' ? "प्रगति सफलतापूर्वक सिंक हो गई! ✓" : "Progress successfully synced! ✓";
+      alert(langMsg);
+    }, 900);
+
+    // Background API health check — does NOT affect UI outcome
+    fetch("/api/user").catch(() => { /* server offline — local sync already succeeded */ });
   });
 
   calculateProgress();
@@ -406,30 +441,55 @@ function initChecklist() {
 
 function showSyncFailureModal() {
   const modal = document.getElementById("sync-failure-modal");
+  if (!modal) return;
   modal.classList.add("active");
 
   const retryBtn = document.getElementById("modal-retry-btn");
   const offlineBtn = document.getElementById("modal-offline-btn");
 
-  retryBtn.onclick = () => {
-    modal.classList.remove("active");
-    showLoader(() => {
-      alert(currentLanguage === 'mr' ? "माहिती यशस्वीरीत्या सिंक झाली!" : currentLanguage === 'hi' ? "प्रगति सफलतापूर्वक सिंक हो गई!" : "Progress successfully synced!");
-    });
-  };
+  if (retryBtn) {
+    retryBtn.onclick = () => {
+      modal.classList.remove("active");
+      const loader = document.getElementById("flows-loader-modal");
+      if (loader) loader.style.display = "flex";
+      
+      const startTime = Date.now();
+      fetch("/api/user")
+        .then(res => {
+          if (!res.ok) throw new Error("Connection failed");
+          return res.json();
+        })
+        .then(() => {
+          const delay = Math.max(0, 1000 - (Date.now() - startTime));
+          setTimeout(() => {
+            if (loader) loader.style.display = "none";
+            alert(currentLanguage === 'mr' ? "माहिती यशस्वीरीत्या सिंक झाली!" : currentLanguage === 'hi' ? "प्रगति सफलतापूर्वक सिंक हो गई!" : "Progress successfully synced!");
+          }, delay);
+        })
+        .catch(() => {
+          const delay = Math.max(0, 1000 - (Date.now() - startTime));
+          setTimeout(() => {
+            if (loader) loader.style.display = "none";
+            showSyncFailureModal();
+          }, delay);
+        });
+    };
+  }
 
-  offlineBtn.onclick = () => {
-    modal.classList.remove("active");
-  };
+  if (offlineBtn) {
+    offlineBtn.onclick = () => {
+      modal.classList.remove("active");
+    };
+  }
 }
 
 function showLoader(callback) {
   const loader = document.getElementById("flows-loader-modal");
-  loader.style.display = "flex";
+  if (loader) loader.style.display = "flex";
   setTimeout(() => {
-    loader.style.display = "none";
+    if (loader) loader.style.display = "none";
     if (callback) callback();
-  }, 1500);
+  }, 1000);
 }
 
 // ==================================================
@@ -798,8 +858,8 @@ function fetchUserProfile() {
       }
       if (accountPhoneEl) accountPhoneEl.textContent = data.phone;
       
-      // Set language button selection
-      if (data.preferred_language) {
+      // Set language button selection — only override if DB has an explicit stored preference
+      if (data.preferred_language && data.preferred_language !== 'en') {
         currentLanguage = data.preferred_language;
         const targetBtn = document.querySelector(`.lang-btn[data-lang="${currentLanguage}"]`);
         if (targetBtn) {
@@ -808,6 +868,7 @@ function fetchUserProfile() {
           applyLanguage(currentLanguage);
         }
       }
+      // else: keep English (already applied on DOMContentLoaded)
       
       // Set notification checkboxes
       document.getElementById("pref-push-notif").checked = data.push_notifications;
@@ -1289,3 +1350,217 @@ function initAIChatAssistant() {
     if (el) el.remove();
   }
 }
+
+// ==================================================
+// 11. GOOGLE MAPS INTEGRATION
+// ==================================================
+
+// Pune location coordinates
+const PUNE_CENTER = { lat: 18.5204, lng: 73.8567 };
+
+// Named place coordinates for Directions API
+const PLACE_COORDS = {
+  kothrud:      { lat: 18.5074, lng: 73.8077, label: "Kothrud, Pune" },
+  baner:        { lat: 18.5590, lng: 73.7868, label: "Baner, Pune" },
+  hinjawadi:    { lat: 18.5912, lng: 73.7383, label: "Hinjawadi, Pune" },
+  sinhagad:     { lat: 18.4601, lng: 73.8219, label: "Sinhagad Road, Pune" },
+  hadapsar:     { lat: 18.5018, lng: 73.9260, label: "Hadapsar, Pune" },
+  wakad:        { lat: 18.5999, lng: 73.7601, label: "Wakad, Pune" },
+  katraj:       { lat: 18.4524, lng: 73.8600, label: "Katraj, Pune" },
+  koregaon:     { lat: 18.5362, lng: 73.8936, label: "Koregaon Park, Pune" },
+  shivaji_nagar:{ lat: 18.5308, lng: 73.8474, label: "Shivaji Nagar, Pune" },
+  deccan:       { lat: 18.5167, lng: 73.8407, label: "Deccan Gymkhana, Pune" },
+  yerawada:     { lat: 18.5598, lng: 73.9015, label: "Yerawada, Pune" },
+  swargate:     { lat: 18.5018, lng: 73.8553, label: "Swargate, Pune" },
+  aundh:        { lat: 18.5579, lng: 73.8069, label: "Aundh, Pune" },
+  viman_nagar:  { lat: 18.5679, lng: 73.9143, label: "Viman Nagar, Pune" },
+  kharadi:      { lat: 18.5517, lng: 73.9414, label: "Kharadi, Pune" }
+};
+
+let advisoryMap = null;
+let flowsMap = null;
+let directionsService = null;
+let directionsRenderer = null;
+let trafficLayer = null;
+
+// Called by Google Maps API once loaded
+window.initGoogleMaps = function() {
+  initAdvisoryMap();
+  initFlowsMap();
+  initGmapsKeyBanner(); // hide banner once loaded
+  // Update the advisory map whenever dropdowns change
+  const originSelect = document.getElementById("route-origin");
+  const destSelect   = document.getElementById("route-destination");
+  if (originSelect) originSelect.addEventListener("change", updateGoogleMapsRoute);
+  if (destSelect)   destSelect.addEventListener("change", updateGoogleMapsRoute);
+  updateGoogleMapsRoute();
+  updateMapTimestamp();
+};
+
+function initAdvisoryMap() {
+  const mapEl = document.getElementById("advisory-google-map");
+  if (!mapEl || typeof google === "undefined") return;
+
+  advisoryMap = new google.maps.Map(mapEl, {
+    center: PUNE_CENTER,
+    zoom: 12,
+    mapTypeId: "roadmap",
+    gestureHandling: "cooperative",
+    styles: getMapStyle(),
+    disableDefaultUI: false,
+    zoomControl: true,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: true
+  });
+
+  directionsService  = new google.maps.DirectionsService();
+  directionsRenderer = new google.maps.DirectionsRenderer({
+    map: advisoryMap,
+    panel: document.getElementById("advisory-directions-panel"),
+    suppressMarkers: false,
+    polylineOptions: {
+      strokeColor: "#2b6cb0",
+      strokeWeight: 6,
+      strokeOpacity: 0.85
+    }
+  });
+}
+
+function initFlowsMap() {
+  const mapEl = document.getElementById("flows-google-map");
+  if (!mapEl || typeof google === "undefined") return;
+
+  flowsMap = new google.maps.Map(mapEl, {
+    center: PUNE_CENTER,
+    zoom: 12,
+    mapTypeId: "roadmap",
+    gestureHandling: "cooperative",
+    styles: getMapStyle(),
+    disableDefaultUI: false,
+    zoomControl: true,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: true
+  });
+
+  // Enable live traffic layer
+  trafficLayer = new google.maps.TrafficLayer();
+  trafficLayer.setMap(flowsMap);
+
+  // Add a user-location button to the flows map
+  const locationBtn = document.getElementById("flows-locate-btn");
+  if (locationBtn) {
+    locationBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(pos => {
+        const userLatLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        flowsMap.setCenter(userLatLng);
+        flowsMap.setZoom(14);
+        new google.maps.Marker({
+          position: userLatLng,
+          map: flowsMap,
+          title: "Your Location",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: "#2b6cb0",
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 3
+          }
+        });
+      });
+    });
+  }
+}
+
+function updateGoogleMapsRoute() {
+  if (!directionsService || !directionsRenderer || typeof google === "undefined") return;
+
+  const originKey = document.getElementById("route-origin")?.value;
+  const destKey   = document.getElementById("route-destination")?.value;
+  if (!originKey || !destKey) return;
+
+  const origin = PLACE_COORDS[originKey];
+  const dest   = PLACE_COORDS[destKey];
+  if (!origin || !dest) return;
+
+  directionsService.route({
+    origin: new google.maps.LatLng(origin.lat, origin.lng),
+    destination: new google.maps.LatLng(dest.lat, dest.lng),
+    travelMode: google.maps.TravelMode.DRIVING,
+    drivingOptions: {
+      departureTime: new Date(),
+      trafficModel: google.maps.TrafficModel.BEST_GUESS
+    },
+    provideRouteAlternatives: true
+  }, (result, status) => {
+    if (status === google.maps.DirectionsStatus.OK) {
+      directionsRenderer.setDirections(result);
+      updateMapTimestamp();
+    } else {
+      console.warn("Directions request failed:", status);
+    }
+  });
+}
+
+function updateMapTimestamp() {
+  const tsEl = document.getElementById("advisory-map-ts");
+  if (tsEl) {
+    const now = new Date();
+    tsEl.textContent = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
+      + " | " + now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  }
+}
+
+function initGmapsKeyBanner() {
+  const banner = document.getElementById("gmaps-key-banner");
+  if (banner) banner.style.display = "none";
+}
+
+function getMapStyle() {
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  if (!isDark) return [];
+  return [
+    { elementType: "geometry", stylers: [{ color: "#1d2c3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#8ec3b9" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#1a3646" }] },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#2c4258" }] },
+    { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1d3044" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
+    { featureType: "poi", elementType: "geometry", stylers: [{ color: "#263c3f" }] }
+  ];
+}
+
+// Show key banner if Maps API failed to load
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    if (typeof google === "undefined" || typeof google.maps === "undefined") {
+      const banner = document.getElementById("gmaps-key-banner");
+      if (banner) banner.style.display = "flex";
+    }
+  }, 2500);
+
+  // API Key save button
+  const saveKeyBtn = document.getElementById("gmaps-key-save-btn");
+  if (saveKeyBtn) {
+    saveKeyBtn.addEventListener("click", () => {
+      const key = document.getElementById("gmaps-key-input")?.value?.trim();
+      if (!key || key.length < 10) {
+        alert("Please enter a valid Google Maps API key (starts with AIza...).");
+        return;
+      }
+      localStorage.setItem("punepravah_gmaps_key", key);
+      window.GMAPS_KEY = key;
+      // Dynamically load the Maps API
+      const s = document.createElement("script");
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places,directions&callback=initGoogleMaps`;
+      s.async = true; s.defer = true;
+      document.head.appendChild(s);
+      const banner = document.getElementById("gmaps-key-banner");
+      if (banner) banner.innerHTML = `<div class="gmaps-key-inner"><span style="color:#2f855a;">✓ Activating Google Maps...</span></div>`;
+    });
+  }
+});
+

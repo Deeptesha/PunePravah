@@ -9,6 +9,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
+  <!-- Google Maps JavaScript API -->
+  <script>
+    // Google Maps API Key – set via the banner or as window.GMAPS_KEY before load
+    window.GMAPS_KEY = window.GMAPS_KEY || localStorage.getItem('punepravah_gmaps_key') || 'YOUR_GOOGLE_MAPS_API_KEY';
+    window.initGoogleMaps = function() {}; // will be overwritten by app.js
+  </script>
+  <script>
+    // Dynamically load Maps API after key is confirmed
+    function loadGoogleMaps() {
+      var key = window.GMAPS_KEY || localStorage.getItem('punepravah_gmaps_key');
+      if (!key || key === 'YOUR_GOOGLE_MAPS_API_KEY') return;
+      var s = document.createElement('script');
+      s.src = 'https://maps.googleapis.com/maps/api/js?key=' + key + '&libraries=places,directions&callback=initGoogleMaps';
+      s.async = true; s.defer = true;
+      document.head.appendChild(s);
+    }
+    document.addEventListener('DOMContentLoaded', loadGoogleMaps);
+  </script>
 </head>
 <body>
 
@@ -348,6 +366,10 @@
                   <option value="baner">Baner, Pune</option>
                   <option value="hinjawadi">Hinjawadi, Pune</option>
                   <option value="sinhagad">Sinhagad Road, Pune</option>
+                  <option value="hadapsar">Hadapsar, Pune</option>
+                  <option value="wakad">Wakad, Pune</option>
+                  <option value="katraj">Katraj, Pune</option>
+                  <option value="koregaon">Koregaon Park, Pune</option>
                 </select>
               </div>
               <div class="input-with-icon border-top-none">
@@ -356,6 +378,10 @@
                   <option value="shivaji_nagar">Shivaji Nagar</option>
                   <option value="deccan">Deccan Gymkhana</option>
                   <option value="yerawada">Yerawada</option>
+                  <option value="swargate">Swargate</option>
+                  <option value="aundh">Aundh</option>
+                  <option value="viman_nagar">Viman Nagar</option>
+                  <option value="kharadi">Kharadi</option>
                 </select>
               </div>
             </div>
@@ -390,74 +416,35 @@
             </div>
           </div>
 
-          <!-- Main Map -->
+          <!-- Main Map: Google Maps Advisory -->
           <div class="advisor-map-area">
-            <!-- Map Card Header style -->
+            <!-- Map Card Header -->
             <div class="map-title-bar">
               <span class="map-title-text">PUNE TRAVEL ADVISORY MAP</span>
-              <span class="map-timestamp-text">10:34 AM | Oct 26, 2026</span>
+              <span class="map-timestamp-text" id="advisory-map-ts">Loading...</span>
             </div>
-            
-            <div class="map-view-canvas">
-              <svg class="pune-route-svg" viewBox="0 0 600 450">
-                <rect width="100%" height="100%" fill="rgba(0,0,0,0.02)" class="map-canvas-bg"/>
-                <!-- Rivers -->
-                <path d="M 0,320 C 180,320 240,240 320,200 C 400,160 480,140 600,130" fill="none" stroke="#5fa6e6" stroke-width="24" opacity="0.4"/>
-                <text x="350" y="180" class="map-river-text">Mutha River</text>
 
-                <!-- Kothrud Route (Red - Closed) -->
-                <path d="M 120,400 L 250,300 L 320,200 L 320,100" fill="none" stroke="#e03e3e" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" class="path-closed"/>
-                
-                <!-- SB Road Safe Route (Blue) -->
-                <path d="M 120,400 L 80,300 L 100,180 L 200,130 L 320,100" fill="none" stroke="#2b6cb0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" class="path-safe"/>
-                
-                <!-- FC Road Link -->
-                <path d="M 320,200 L 400,180" fill="none" stroke="#dd6b20" stroke-width="6" stroke-linecap="round" stroke-dasharray="4,4"/>
-
-                <!-- Markers -->
-                <g class="map-marker" id="map-origin-marker" transform="translate(120,400)">
-                  <circle r="12" fill="#2b6cb0" opacity="0.3"/>
-                  <circle r="6" fill="#2b6cb0"/>
-                  <text y="24" class="marker-lbl" id="map-origin-lbl">Kothrud (Origin)</text>
-                </g>
-                <g class="map-marker" id="map-dest-marker" transform="translate(320,100)">
-                  <circle r="12" fill="#2f855a" opacity="0.3"/>
-                  <circle r="6" fill="#2f855a"/>
-                  <text y="-18" class="marker-lbl" id="map-dest-lbl">Shivaji Nagar (Dest)</text>
-                </g>
-                <g class="map-marker" id="map-warning-marker" transform="translate(250,300)">
-                  <circle r="10" fill="#e03e3e" opacity="0.3"/>
-                  <circle r="5" fill="#e03e3e"/>
-                </g>
-
-                <!-- Alert Boxes on Map -->
-                <g id="map-alert-card-group" transform="translate(250,260)">
-                  <rect x="-65" y="-12" width="130" height="24" rx="4" fill="#ffffff" stroke="#e03e3e" stroke-width="2" class="map-alert-card"/>
-                  <text id="map-alert-card-text" text-anchor="middle" y="4" font-size="10" font-weight="bold" fill="#c53030">Karve Rd Closed</text>
-                </g>
-
-                <!-- Route Directions Arrows -->
-                <path d="M 90,260 L 95,250 L 90,240" fill="none" stroke="#2b6cb0" stroke-width="2"/>
-                <path d="M 140,160 L 150,155 L 145,145" fill="none" stroke="#2b6cb0" stroke-width="2"/>
-              </svg>
-
-              <!-- Layer Overlay controls -->
-              <div class="map-controls-overlay">
-                <button class="overlay-btn" aria-label="Layers">
-                  <svg viewBox="0 0 24 24"><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg>
-                </button>
-                <button class="overlay-btn" aria-label="Recenter">
-                  <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm9.44 3C20.94 7.53 18.11 4.7 14.5 4.18V2h-5v2.18C5.94 4.7 3.11 7.53 2.56 11H1v2h1.56c.55 3.47 3.38 6.3 6.94 6.82V22h5v-2.18c3.61-.52 6.44-3.35 6.94-6.82H23v-2h-1.56zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
-                </button>
+            <!-- Google Maps API Key Setup Banner -->
+            <div id="gmaps-key-banner" class="gmaps-key-banner" style="display:none;">
+              <div class="gmaps-key-inner">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="#dd6b20"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>
+                <span>Enter your Google Maps API Key to enable live routing:</span>
+                <input id="gmaps-key-input" type="text" placeholder="AIza..." class="gmaps-key-input" />
+                <button id="gmaps-key-save-btn" class="gmaps-key-btn">Activate Maps</button>
               </div>
             </div>
+
+            <!-- Real Google Map Container -->
+            <div id="advisory-google-map" class="google-map-container"></div>
+
+            <!-- Directions info panel below map -->
+            <div id="advisory-directions-panel" class="directions-panel"></div>
 
             <div class="map-footer-label">
               <span>PUNE SMART CITY | TRAFFIC POLICE</span>
             </div>
           </div>
-        </div>
-      </div>
+
 
       <!-- VARIANT C: LIVE TRAFFIC MAP / ALL FLOWS -->
       <div class="travel-variant-content" id="variant-flows-panel">
@@ -485,55 +472,18 @@
               <button class="pill-btn">Traffic Density</button>
             </div>
 
-            <div class="map-view-canvas-full">
-              <svg class="pune-flows-svg" viewBox="0 0 600 450">
-                <rect width="100%" height="100%" fill="rgba(0,0,0,0.02)" class="map-canvas-bg"/>
-                <!-- River -->
-                <path d="M 0,280 C 180,290 220,220 300,190 C 380,160 480,150 600,140" fill="none" stroke="#5fa6e6" stroke-width="20" opacity="0.4"/>
-                
-                <!-- Main Grid Roads (Aundh, Baner, Kothrud, Swargate) -->
-                <!-- Aundh Rd -->
-                <path d="M 150,50 L 300,190" fill="none" stroke="#2f855a" stroke-width="6"/>
-                <!-- Baner Rd -->
-                <path d="M 80,120 L 300,190" fill="none" stroke="#dd6b20" stroke-width="6"/>
-                <!-- Karve Rd -->
-                <path d="M 120,380 L 300,190" fill="none" stroke="#e03e3e" stroke-width="8"/>
-                <!-- Satara Rd (Swargate) -->
-                <path d="M 300,190 L 350,420" fill="none" stroke="#dd6b20" stroke-width="6"/>
-                <!-- Solapur Rd -->
-                <path d="M 300,190 L 550,300" fill="none" stroke="#2f855a" stroke-width="6"/>
-                <!-- Ahmednagar Rd -->
-                <path d="M 300,190 L 500,80" fill="none" stroke="#2f855a" stroke-width="6"/>
+            <!-- Real Google Map with Live Traffic Layer -->
+            <div class="map-view-canvas-full" style="position:relative;">
+              <div id="flows-google-map" class="google-map-container" style="height:100%;border-radius:12px;"></div>
 
-                <!-- Warning Pins -->
-                <!-- Sinhagad Rd -->
-                <g class="map-pin" transform="translate(180,330)">
-                  <circle r="12" class="pin-pulse pin-red"/>
-                  <circle r="4" fill="#ffffff"/>
-                </g>
-                <!-- Swargate -->
-                <g class="map-pin" transform="translate(300,230)">
-                  <circle r="10" class="pin-pulse pin-orange"/>
-                  <circle r="3" fill="#ffffff"/>
-                </g>
-
-                <!-- Labels -->
-                <text x="315" y="195" font-size="12" font-weight="bold">Pune Centre</text>
-                <text x="80" y="100" font-size="10">Baner</text>
-                <text x="120" y="45" font-size="10">Aundh</text>
-                <text x="70" y="380" font-size="10">Kothrud</text>
-                <text x="350" y="360" font-size="10">Swargate</text>
-              </svg>
-
-              <!-- Zoom Controls -->
+              <!-- Locate Me Button -->
               <div class="flows-zoom-controls">
-                <button class="zoom-btn">+</button>
-                <button class="zoom-btn">-</button>
-                <button class="zoom-btn loc-btn">
+                <button class="zoom-btn loc-btn" id="flows-locate-btn" title="Center on my location">
                   <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm9.44 3c-.55-3.47-3.38-6.3-6.94-6.82V2h-5v2.18C5.94 4.7 3.11 7.53 2.56 11H1v2h1.56c.55 3.47 3.38 6.3 6.94 6.82V22h5v-2.18c3.61-.52 6.44-3.35 6.94-6.82H23v-2h-1.56z"/></svg>
                 </button>
               </div>
             </div>
+
           </div>
 
           <!-- Right Sidebar: Active Advisories -->
