@@ -82,12 +82,202 @@
 
 body {
   font-family: var(--font-family-body);
-  background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s ease, color 0.3s ease;
+
+  /* Pune skyline background */
+  background: #0f172a url('pune-skyline.jpg') center / cover fixed no-repeat;
+  position: relative;
+  min-height: 100vh;
 }
+
+/* Dark overlay so text remains readable over the photo */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.82) 0%,
+    rgba(15, 23, 42, 0.68) 40%,
+    rgba(15, 23, 42, 0.78) 100%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Ensure all direct children sit above the overlay */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ──────────────────────────────────────────
+   FORCE LIGHT TEXT — skyline is always dark
+   ────────────────────────────────────────── */
+
+/* All text defaults to white / near-white */
+body,
+body h1, body h2, body h3, body h4, body h5, body h6,
+body p, body span, body label, body td, body th, body li,
+body .nav-text,
+body .alert-title,
+body .stat-value,
+body .stat-label,
+body .card-title,
+body .dam-name,
+body .dam-level,
+body .section-title,
+body .route-label,
+body .checklist-label,
+body .info-label,
+body .info-value,
+body .settings-label {
+  color: #f1f5f9 !important;
+}
+
+/* Muted / secondary text slightly dimmer */
+body .text-muted,
+body .stat-subtitle,
+body .dam-subtitle,
+body .card-subtitle,
+body .timestamp {
+  color: #94a3b8 !important;
+}
+
+/* ── Logo ── */
+.logo-title {
+  color: #93c5fd !important;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+/* ── Header glassmorphism ── */
+.main-header {
+  background: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* ── Tab buttons — bright and visible ── */
+.tab-btn {
+  color: rgba(255, 255, 255, 0.75) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tab-btn:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+.tab-btn.active {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+  color: #93c5fd !important;
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.4);
+}
+.tab-btn svg,
+.tab-btn .icon-nav {
+  fill: currentColor !important;
+}
+
+/* ── Header action icons ── */
+.action-icon-btn {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+.action-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+.action-icon-btn svg,
+.icon-header {
+  fill: rgba(255, 255, 255, 0.8) !important;
+}
+.action-icon-btn:hover svg,
+.action-icon-btn:hover .icon-header {
+  fill: #ffffff !important;
+}
+
+/* ── Cards glassmorphism ── */
+.alert-card,
+.stat-card,
+.dam-card,
+.weather-card,
+.checklist-card,
+.route-card,
+.settings-card,
+.info-card {
+  background: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* ── View panels transparent ── */
+.view-panel {
+  background: transparent !important;
+}
+
+/* ── SOS banner ── */
+.sos-banner {
+  background: rgba(197, 48, 48, 0.8) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 100, 100, 0.3) !important;
+}
+.sos-banner .sos-text {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+/* ── Form controls (selects, inputs) ── */
+select,
+input[type="text"],
+input[type="number"],
+textarea {
+  background: rgba(30, 41, 59, 0.7) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+select option {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+/* ── Buttons in cards ── */
+.btn-primary,
+.sync-btn,
+.checklist-sync-btn {
+  background: rgba(59, 130, 246, 0.8) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(96, 165, 250, 0.4) !important;
+}
+.btn-primary:hover,
+.sync-btn:hover,
+.checklist-sync-btn:hover {
+  background: rgba(37, 99, 235, 0.9) !important;
+}
+
+/* ── Stat card icons/SVGs ── */
+.stat-card svg,
+.icon-warning,
+.icon-sos {
+  fill: currentColor !important;
+}
+
+/* ── Alert level-specific borders (keep the color coding) ── */
+.border-red {
+  border-left: 4px solid #ef4444 !important;
+}
+.border-orange {
+  border-left: 4px solid #f59e0b !important;
+}
+.border-green {
+  border-left: 4px solid #22c55e !important;
+}
+
+
 
 /* ==================================================
    2. HEADER & NAVIGATION
@@ -551,30 +741,39 @@ body {
 }
 
 .map-lbl {
-  font-size: 9px;
-  fill: var(--text-secondary);
+  font-size: 10px;
+  fill: #cbd5e1 !important;
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 .map-lbl.bold {
   font-weight: 700;
-  fill: var(--text-primary);
+  font-size: 11px;
+  fill: #ffffff !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
 }
 .map-lbl.danger {
-  fill: var(--color-red);
-  font-weight: 600;
+  fill: #fca5a5 !important;
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
 }
 
 .map-river-label {
-  font-weight: 600;
+  font-weight: 700;
   font-style: italic;
+  fill: #93c5fd !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
+
 .map-legend {
-  background-color: var(--bg-secondary);
-  border-top: 1px solid var(--color-border);
+  background: rgba(15, 23, 42, 0.4) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
   padding: 10px 14px;
   display: flex;
   justify-content: space-around;
 }
+
 
 .legend-item {
   display: flex;

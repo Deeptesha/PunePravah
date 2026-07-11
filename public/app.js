@@ -1128,13 +1128,14 @@ function initMapLayers() {
       // Show rivers and water flood zone
       if (sinhagadRiskZone) sinhagadRiskZone.style.display = "block";
       rivers.forEach(r => {
-        r.style.opacity = "0.6";
+        r.style.opacity = "0.85";
         r.style.stroke = "#5fa6e6";
       });
       
       // Dim roads
       roads.forEach(road => {
-        road.style.opacity = "0.3";
+        road.style.opacity = "0.2";
+        road.style.stroke = "#cbd5e1"; // Neutral color when not in traffic tab
       });
     });
 
@@ -1153,19 +1154,23 @@ function initMapLayers() {
       roads.forEach(road => {
         road.style.opacity = "1.0";
         if (road.classList.contains("road-danger")) {
-          road.style.stroke = "#e53e3e"; // Red alert delay
+          road.style.stroke = "#ef4444"; // Red alert delay
           road.style.strokeWidth = "8";
         } else if (road.classList.contains("road-warning")) {
-          road.style.stroke = "#dd6b20"; // Orange warning delay
+          road.style.stroke = "#f59e0b"; // Orange warning delay
           road.style.strokeWidth = "6";
         } else {
-          road.style.stroke = "#48bb78"; // Green safe flow
+          road.style.stroke = "#10b981"; // Green safe flow
           road.style.strokeWidth = "4";
         }
       });
     });
+
+    // Set initial state by programmatically clicking the default tab (Water Level)
+    riskWaterBtn.click();
   }
 }
+
 
 function initLiveAggregatedAlerts() {
   const alertCard = document.getElementById("dashboard-alert-card");
