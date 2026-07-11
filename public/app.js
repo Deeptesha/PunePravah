@@ -302,6 +302,9 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Load unified meteorological alerts
   initLiveAggregatedAlerts();
+  
+  // Initialize AI Safety Chat Assistant
+  initAIChatAssistant();
 });
 
 // ==================================================
@@ -1198,4 +1201,81 @@ function initLiveAggregatedAlerts() {
         damSub.style.color = "#e53e3e";
       }
     });
+}
+
+function initAIChatAssistant() {
+  const toggleBtn = document.getElementById("chat-toggle-btn");
+  const closeBtn = document.getElementById("chat-close-btn");
+  const chatWindow = document.getElementById("chat-window");
+  const form = document.getElementById("chat-input-form");
+  const input = document.getElementById("chat-input");
+  const messagesContainer = document.getElementById("chat-messages");
+
+  if (!toggleBtn || !chatWindow) return;
+
+  // Toggle Chat Window
+  toggleBtn.addEventListener("click", () => {
+    const isHidden = chatWindow.style.display === "none";
+    chatWindow.style.display = isHidden ? "flex" : "none";
+    if (isHidden && input) input.focus();
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      chatWindow.style.display = "none";
+    });
+  }
+
+  // Handle message sending
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const query = input.value.trim();
+    if (!query) return;
+
+    // 1. Append User Message
+    appendMessage(query, "user-msg");
+    input.value = "";
+
+    // 2. Append Typing/Loader indicator
+    const loaderId = appendMessage("Thinking...", "system-msg");
+
+    // 3. Post to backend
+    fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: query })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("Connection lost");
+      return res.json();
+    })
+    .then(data => {
+      // Remove typing loader and append real answer
+      removeMessage(loaderId);
+      appendMessage(data.response, "system-msg");
+    })
+    .catch(err => {
+      removeMessage(loaderId);
+      appendMessage("Unable to reach AI Assistant. Please check your connectivity or consult municipal disaster hotlines directly.", "system-msg");
+    });
+  });
+
+  function appendMessage(text, className) {
+    const msgEl = document.createElement("div");
+    msgEl.className = `message ${className}`;
+    msgEl.innerText = text;
+    
+    // Generate unique ID to allow removal of loaders
+    const msgId = "chat-msg-" + Date.now() + Math.random().toString(36).substr(2, 5);
+    msgEl.id = msgId;
+
+    messagesContainer.appendChild(msgEl);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    return msgId;
+  }
+
+  function removeMessage(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
 }

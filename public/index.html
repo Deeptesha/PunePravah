@@ -751,6 +751,28 @@
     </div>
   </div>
 
+  <!-- AI CHAT FLOATING DRAWER WIDGET -->
+  <div class="ai-chat-widget" id="ai-chat-widget">
+    <button class="chat-toggle-btn" id="chat-toggle-btn" aria-label="Open AI Safety Assistant">
+      <svg class="icon-chat" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+    </button>
+    <div class="chat-window" id="chat-window" style="display: none;">
+      <div class="chat-header">
+        <strong>PunePravah AI Assistant</strong>
+        <button class="chat-close-btn" id="chat-close-btn" aria-label="Close Chat">×</button>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="message system-msg">
+          Hello! I am the PunePravah AI Safety Assistant. Ask me about dam discharge rates, flooded roads, or active emergency contact numbers in Pune.
+        </div>
+      </div>
+      <form class="chat-input-form" id="chat-input-form">
+        <input type="text" id="chat-input" placeholder="Ask about dams, flood risk, or SOS numbers..." required aria-label="Chat input field">
+        <button type="submit" class="chat-send-btn" aria-label="Send Message">Send</button>
+      </form>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
