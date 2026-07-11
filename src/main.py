@@ -64,6 +64,12 @@ def scrub_pii(text: str) -> str:
     text = re.sub(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", "[IP_SCRUBBED]", text)
     return text
 
+def clean_input(text: str) -> str:
+    """Removes HTML tags from user strings to prevent XSS injections."""
+    if not text:
+        return ""
+    return re.sub(r"<[^>]*>", "", text)
+
 # ==================================================
 # PYDANTIC SCHEMAS
 # ==================================================
@@ -110,6 +116,14 @@ class ContactCreatePayload(BaseModel):
     name: str
     number: str
     region: Optional[str] = "Pune Custom"
+
+class ChatRequest(BaseModel):
+    message: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+class ChatResponse(BaseModel):
+    response: str
 
 # ==================================================
 # API FEED CONNECTOR (Zero Mocks, Live Telemetry)
@@ -190,8 +204,8 @@ async def get_live_weather() -> WeatherResponse:
         raw_status="LIVE_API"
     )
 
-@app.get("/api/unified-alert")
-async def get_unified_alert_endpoint():
+@app.get("/api/unified-alert", response_model=Dict[str, Any])
+async def get_unified_alert_endpoint() -> Dict[str, Any]:
     """Gathers aggregated, live warning details from IMD, OpenWeather, and PMC data streams."""
     try:
         data = await aggregator.get_unified_alert()
@@ -256,8 +270,8 @@ async def check_route_safety(request: RouteAlertRequest) -> AlertCheckResponse:
 # ==================================================
 # SQL DATABASE ENDPOINTS FOR SETTINGS TAB
 # ==================================================
-@app.get("/api/user")
-async def get_user_profile():
+@app.get("/api/user", response_model=Dict[str, Any])
+async def get_user_profile() -> Dict[str, Any]:
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
@@ -277,8 +291,8 @@ async def get_user_profile():
     except Exception as e:
         raise HTTPException(status_code=500, detail=scrub_pii(str(e)))
 
-@app.post("/api/user")
-async def update_user_profile(payload: UserUpdatePayload):
+@app.post("/api/user", response_model=Dict[str, str])
+async def update_user_profile(payload: UserUpdatePayload) -> Dict[str, str]:
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
@@ -292,8 +306,8 @@ async def update_user_profile(payload: UserUpdatePayload):
     except Exception as e:
         raise HTTPException(status_code=500, detail=scrub_pii(str(e)))
 
-@app.get("/api/contacts")
-async def get_emergency_contacts():
+@app.get("/api/contacts", response_model=List[Dict[str, Any]])
+async def get_emergency_contacts() -> List[Dict[str, Any]]:
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
@@ -314,8 +328,8 @@ async def get_emergency_contacts():
     except Exception as e:
         raise HTTPException(status_code=500, detail=scrub_pii(str(e)))
 
-@app.post("/api/contacts")
-async def create_emergency_contact(payload: ContactCreatePayload):
+@app.post("/api/contacts", response_model=Dict[str, str])
+async def create_emergency_contact(payload: ContactCreatePayload) -> Dict[str, str]:
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
@@ -328,6 +342,109 @@ async def create_emergency_contact(payload: ContactCreatePayload):
         return {"status": "SUCCESS"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=scrub_pii(str(e)))
+
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat_assistant(payload: ChatRequest) -> ChatResponse:
+    try:
+        # 1. Fetch current unified weather and dam release status
+        alert_data = await aggregator.get_unified_alert()
+        weather = alert_data.get("weather", {})
+        telemetry = alert_data.get("municipal_telemetry", {})
+        
+        # Security: Sanitize user input to prevent XSS injections
+        clean_msg = clean_input(payload.message)
+        msg = clean_msg.lower().strip()
+        response_text = ""
+        
+        # Resolve ward if latitude and longitude are supplied
+        ward_name = ""
+        elevation_type = ""
+        if payload.latitude is not None and payload.longitude is not None:
+            ward_name, elevation_type = resolve_ward(payload.latitude, payload.longitude)
+        
+        # 2. Context-aware logical decision making
+        if "area" in msg or "ward" in msg or "safe" in msg or "current location" in msg:
+            if ward_name:
+                alert_level = weather.get("alert_level", "GREEN")
+                risk_level = "High" if alert_level in ["RED", "ORANGE"] else "Low"
+                response_text = f"Your current resolved area is **{ward_name}** ({elevation_type} zone). "
+                if "Sinhagad" in ward_name:
+                    response_text += f"\nRisk Profile: **{risk_level}**. Sinhagad Road is low-lying near the Mutha Riverbed, meaning discharge releases from Khadakwasla represent active flooding risks."
+                elif "Pimpri-Chinchwad" in ward_name:
+                    response_text += f"\nRisk Profile: **{risk_level}**. Low-lying riverbeds in PCMC are flood-prone under heavy rain. Avoid Pavana subways."
+                else:
+                    response_text += f"\nRisk Profile: **{risk_level}**. General drainage pooling could occur under active alerts. Stay tuned to PunePravah routes advisor."
+            else:
+                response_text = "I couldn't resolve your ward coordinates. Please check your location settings or input GPS coordinates on the maps."
+                
+        elif "dam" in msg or "release" in msg or "discharge" in msg or "khadakwasla" in msg or "panshet" in msg:
+            if isinstance(telemetry.get("dam_storage"), list):
+                dams_info = []
+                for d in telemetry["dam_storage"]:
+                    dams_info.append(f"{d['dam_name']} dam is at {d['storage_percentage']}% capacity discharging {d['discharge_cusecs']} cusecs ({d['status']})")
+                response_text = "Here is the official PMC dam release update:\n- " + "\n- ".join(dams_info) + "\n\nPlease avoid riverside paths if discharge is designated as HIGH_DISCHARGE."
+            else:
+                response_text = "The PMC Open Data dam levels service is currently offline. Refer to local announcements for water discharge alerts."
+                
+        elif "waterlog" in msg or "flood" in msg or "clog" in msg:
+            if isinstance(telemetry.get("waterlogging_reports"), list) and len(telemetry["waterlogging_reports"]) > 0:
+                reports = []
+                for r in telemetry["waterlogging_reports"]:
+                    reports.append(f"[{r['severity']}] {r['ward_resolved']}: {r['description']} ({r['status']})")
+                response_text = "Current active waterlogging reports:\n- " + "\n- ".join(reports)
+            else:
+                response_text = "No severe waterlogging incidents registered in PMC open logs right now. Regional roads are currently flowing normally."
+                
+        elif "route" in msg or "travel" in msg or "road" in msg or "direction" in msg:
+            response_text = (
+                "For route safety checks and active detours, please use the **Travel** tab. "
+                "Our Route Advisor tracks waterlogging and delays across 12 Pune routes including Swargate, Deccan, Yerawada, and Hinjawadi."
+            )
+            
+        elif "emergency" in msg or "sos" in msg or "contact" in msg or "phone" in msg or "call" in msg:
+            # Query custom contacts from SQLite database
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            cursor.execute("SELECT name, number FROM emergency_contacts WHERE is_official = 0")
+            rows = cursor.fetchall()
+            conn.close()
+            
+            custom_contacts = [f"{r[0]}: {r[1]}" for r in rows]
+            response_text = (
+                f"Official Helplines:\n- PMC Disaster Cell: {PMC_EMERGENCY_PHONE}\n"
+                f"- PCMC Disaster Cell: {PCMC_EMERGENCY_PHONE}\n"
+                f"- District Disaster Cell: 020-26123371\n"
+                f"- Emergency Police: 112\n"
+            )
+            if custom_contacts:
+                response_text += "\nYour Custom Emergency Contacts:\n- " + "\n- ".join(custom_contacts)
+            else:
+                response_text += "\nNo custom SOS contacts saved yet. Add them in the **Settings** tab to persist them."
+                
+        elif "hi" in msg or "hello" in msg or "help" in msg:
+            response_text = (
+                "Hello! I am your PunePravah AI Monsoon Safety Assistant. 🌧️\n\n"
+                "Ask me about:\n"
+                "1. **Ward safety risk check** (e.g. 'Is my area safe?')\n"
+                "2. **Dam levels & discharges** (e.g. 'What is the discharge at Khadakwasla?')\n"
+                "3. **Waterlogged areas** (e.g. 'Are there any flooded roads?')\n"
+                "4. **Emergency Helplines** (e.g. 'Give me contact numbers')"
+            )
+        else:
+            # Fall back to localized meteorological warning summary
+            response_text = (
+                f"Pune Central is currently under a **{weather.get('alert_level', 'GREEN')} Alert** status. "
+                f"The active rainfall intensity is measured at {weather.get('precipitation_rate_mm_hr', 0.0)} mm/hr. "
+                f"Summary: {weather.get('nowcast_summary', 'All routes normal.')}"
+            )
+            
+        return ChatResponse(response=response_text)
+    except Exception as e:
+        logger.error(f"Chat assistant handler failed: {scrub_pii(str(e))}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="AI Assistant service temporarily unavailable."
+        )
 
 # Serve static web files
 public_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public")

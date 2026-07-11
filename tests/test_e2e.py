@@ -70,5 +70,61 @@ def test_full_user_flow_e2e():
     print("--> Verification loop summaries and emergency cells are correctly populated in response.")
     print("E2E Integration Verification Flow Completed successfully!")
 
+def test_user_profile_endpoints():
+    """Verifies that user profile configuration settings can be fetched and updated successfully."""
+    # 1. Fetch current profile
+    res_get = client.get("/api/user")
+    assert res_get.status_code == 200
+    p = res_get.json()
+    assert "name" in p
+    assert "phone" in p
+
+    # 2. Update profile details
+    payload = {
+        "name": "Jane Doe Test",
+        "phone": "9876543210",
+        "preferred_language": "mr",
+        "push_notifications": True,
+        "sms_notifications": False
+    }
+    res_post = client.post("/api/user", json=payload)
+    assert res_post.status_code == 200
+    assert res_post.json()["status"] == "SUCCESS"
+
+    # 3. Re-fetch and confirm persistence
+    res_get2 = client.get("/api/user")
+    p2 = res_get2.json()
+    assert p2["name"] == "Jane Doe Test"
+    assert p2["phone"] == "9876543210"
+    assert p2["preferred_language"] == "mr"
+    assert p2["push_notifications"] is True
+    assert p2["sms_notifications"] is False
+
+def test_chat_assistant_security_and_context():
+    """Verifies the AI Safety Chat assistant sanitizes inputs and makes logical decisions based on location context."""
+    from main import clean_input
+    
+    # 1. Test XSS HTML input sanitization
+    dirty_string = "<script>alert('xss')</script>Hello safe text"
+    clean_string = clean_input(dirty_string)
+    assert "script" not in clean_string
+    assert "Hello safe text" in clean_string
+
+    # 2. Test chat route matching for dams
+    res_dam = client.post("/api/chat", json={"message": "What is the status of Khadakwasla dam?"})
+    assert res_dam.status_code == 200
+    assert "dam" in res_dam.json()["response"].lower()
+
+    # 3. Test chat route matching with geofence context (Sinhagad Road)
+    res_geo = client.post("/api/chat", json={
+        "message": "Is my area safe?",
+        "latitude": 18.4770,
+        "longitude": 73.8224
+    })
+    assert res_geo.status_code == 200
+    resp_text = res_geo.json()["response"]
+    assert "Sinhagad Road" in resp_text
+    assert "risk" in resp_text.lower() or "capacity" in resp_text.lower() or "resolved" in resp_text.lower()
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

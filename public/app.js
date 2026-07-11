@@ -1232,6 +1232,12 @@ function initAIChatAssistant() {
     const query = input.value.trim();
     if (!query) return;
 
+    // Grab current coordinate context for geofenced advice
+    const latInput = document.getElementById("input-lat");
+    const lonInput = document.getElementById("input-lon");
+    const lat = latInput ? parseFloat(latInput.value) : null;
+    const lon = lonInput ? parseFloat(lonInput.value) : null;
+
     // 1. Append User Message
     appendMessage(query, "user-msg");
     input.value = "";
@@ -1239,11 +1245,15 @@ function initAIChatAssistant() {
     // 2. Append Typing/Loader indicator
     const loaderId = appendMessage("Thinking...", "system-msg");
 
-    // 3. Post to backend
+    // 3. Post to backend with location context
     fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: query })
+      body: JSON.stringify({
+        message: query,
+        latitude: isNaN(lat) ? null : lat,
+        longitude: isNaN(lon) ? null : lon
+      })
     })
     .then(res => {
       if (!res.ok) throw new Error("Connection lost");
