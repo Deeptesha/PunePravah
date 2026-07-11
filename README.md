@@ -4,8 +4,23 @@
 
 ---
 
+## 🎯 Challenge Alignment & Vertical Selection
+
+* **Chosen Vertical**: **Monsoon Safety & Emergency Alert Assistant** (Public Safety/Disaster Preparedness).
+* **Approach & Logic**: Integrates real-time weather forecasts (IMD via Open-Meteo), visual maps (OpenWeather), and municipal data (PMC dam releases/waterlogging) into a concurrent async data aggregator. Decisions are made logically based on the user's coordinate context (geofencing ward-level warnings) and settings context.
+* **How the Solution Works**:
+  1. The **Data Aggregator** queries feeds concurrently using `asyncio.gather` and implements a 5-minute cache.
+  2. The **AI Chat Assistant** matches user queries (e.g., about dams, route travel, emergency contacts) and retrieves active sensor readings or SQL database details to output contextual warnings.
+  3. The **Travel tab** resolves geolocation to center map layers and highlights detours for 12 routes.
+* **Assumptions Made**:
+  1. If PMC open data endpoints are offline, the system falls back to filesystem reading (`dams.json`) or degrades gracefully to "Data Unavailable" to maintain UI operation.
+  2. Weather alert thresholds are set to standard disaster criteria ($\ge 50$ mm/hr for RED alert).
+
+---
+
 ## 🚀 Key Features
 
+* **Smart AI Chat Assistant**: Conversational safety drawer widget queryable on the dashboard. Formulates customized responses (dams status, waterlogging feeds, local emergency lines, safety checklists) by reading real-time database parameters.
 * **Data Aggregator Pattern**: Concurrently queries IMD Pune nowcasts (via Open-Meteo), OpenWeather geospatial maps, and PMC Open Data portals asynchronously using `asyncio.gather` and `httpx`.
 * **Zero-Network Loopback & Offline Degradation**: Bypasses loopback connection bottlenecks by loading PMC dam releases and active waterlogging incidents directly from the filesystem if portals timeout.
 * **Travel Geolocation & Routing**: Tracks HTML5 GPS positions to identify the closest municipal hub and displays dynamic detours, delays ($+15$ to $+45$ mins), and warnings across 12 distinct routes.
@@ -27,7 +42,7 @@ punepravah/
 │   ├── app.js                 # Geolocation, tabs & routing
 │   └── dams.json              # Local PMC open data backup
 ├── src/
-│   ├── main.py                # FastAPI routing & SQL endpoints
+│   ├── main.py                # FastAPI routing, SQL & Chat endpoints
 │   └── weather_service.py     # Aggregator cache & PII log scrubbers
 ├── tests/
 │   ├── test_e2e.py            # User end-to-end flow checks
