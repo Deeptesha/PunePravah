@@ -15,9 +15,83 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 import httpx
 
-# Database configuration
+# Database configuration & Serverless Fallback
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "config", "pune_monsoon.db")
+DB_DIR = os.path.join(BASE_DIR, "config")
+db_file = "pune_monsoon.db"
+test_db_path = os.path.join(DB_DIR, db_file)
+
+try:
+    # Try to write to config dir to verify it's writable (fails on read-only systems like Vercel)
+    os.makedirs(DB_DIR, exist_ok=True)
+    test_file = os.path.join(DB_DIR, ".write_test")
+    with open(test_file, "w") as f:
+        f.write("test")
+    os.remove(test_file)
+    DB_PATH = test_db_path
+except Exception:
+    # Fallback to /tmp which is writable on Vercel and Cloud Run
+    DB_PATH = os.path.join("/tmp", db_file)
+
+def init_db(db_path: str):
+    """Initializes tables and seeds starting data in the database if empty."""
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # 1. Create tables
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        preferred_language TEXT DEFAULT 'en',
+        push_notifications INTEGER DEFAULT 1,
+        sms_notifications INTEGER DEFAULT 0
+    );
+    """)
+    
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS emergency_contacts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        number TEXT NOT NULL,
+        region TEXT NOT NULL,
+        is_official INTEGER DEFAULT 1
+    );
+    """)
+    conn.commit()
+    
+    # 2. Seed user if empty
+    cursor.execute("SELECT COUNT(*) FROM users")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute(
+            "INSERT INTO users (name, phone, preferred_language, push_notifications, sms_notifications) VALUES (?, ?, ?, ?, ?)",
+            ("Pune Resident", "+91 98765 43210", "en", 1, 0)
+        )
+        conn.commit()
+        
+    # 3. Seed emergency contacts if empty
+    cursor.execute("SELECT COUNT(*) FROM emergency_contacts")
+    if cursor.fetchone()[0] == 0:
+        default_contacts = [
+            ("PMC Control Room", "020-25501269", "Pune City", 1),
+            ("PMC Control Room (Backup)", "020-25506800", "Pune City", 1),
+            ("PCMC Control Room", "020-67333333", "Pimpri-Chinchwad", 1),
+            ("District Disaster Cell", "020-26123371", "Pune District", 1),
+            ("Pune Police", "112", "Pune Generic", 1),
+            ("Fire Brigade", "101", "Pune Generic", 1)
+        ]
+        cursor.executemany(
+            "INSERT INTO emergency_contacts (name, number, region, is_official) VALUES (?, ?, ?, ?)",
+            default_contacts
+        )
+        conn.commit()
+        
+    conn.close()
+
+# Auto-initialize on import so it's always ready on startup
+init_db(DB_PATH)
+
 
 # Import Data Aggregator weather service
 from weather_service import PunePravahAggregator
